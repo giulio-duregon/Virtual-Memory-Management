@@ -6,5 +6,8 @@
             "binaryPath": "/Users/giulio/OS-Lab3/des_mmu",
             "binaryArgs": []
         }
-    ]
+    ],
+    "files.associations": {
+        "exception": "cpp"
+    }
 }

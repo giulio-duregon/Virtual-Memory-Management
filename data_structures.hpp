@@ -5,12 +5,12 @@
 // Max number of page table entries
 const unsigned int NUM_PTE = 64;
 
-// VMA Bitfield structure
-struct pte_t
+// VMA Page Bitfield structure -> Contains Protection Flags metadata and frame_number
+typedef struct pte_t
 {
     // Custom Protection / Flag bits
-    unsigned int UNUSED : 19;
-    unsigned int PID : 1;
+    unsigned int UNUSED : 12;
+    unsigned int PID : 8;
 
     // Required Protection / Flag Bits
     unsigned int PRESENT : 1;
@@ -23,15 +23,28 @@ struct pte_t
     unsigned int frame_number : 7;
 };
 
-class Page_Table
+// Frame Table Struct - Stores Data for Reverse Mapping frame -> page
+typedef struct frame_t
 {
+    // Process id
+    unsigned short process_id;
+
+    // Page number bits (Supports 128 frames as maximum)
+    unsigned short VMA_frame_number;
+};
+
+class Process
+{
+    static int counter;
+
 public:
-    pte_t get_page_table_entry(int entry)
+    Process()
     {
-        return page_table_arr[entry];
+        pid = counter++;
     }
 
 private:
+    unsigned int pid;
     pte_t page_table_arr[NUM_PTE];
 };
 
