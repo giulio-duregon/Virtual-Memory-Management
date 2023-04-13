@@ -129,5 +129,16 @@ int main(int argc, char **argv)
     }
     rfile.close();
 
+    // Read in input from file -> Read in Num Process -> Make VMAs -> make event -> add to event deque
+    std::ifstream input_file(inputfile_name);
+    if (input_file.is_open())
+    {
+        while (getline(input_file, line))
+        {
+            // TODO:
+            break;
+        }
+        input_file.close();
+    }
     return 0;
 }
