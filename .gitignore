@@ -1,3 +1,8 @@
+des_mmu
+in*
+gradeit*
+refout*
+runit*
 # Prerequisites
 *.d
 

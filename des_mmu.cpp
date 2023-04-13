@@ -42,26 +42,26 @@ int main(int argc, char **argv)
     algorithms (not all algorithms have the details described in more detail below)
     -------------------------------------------------------------------------------
     */
-    bool f, a;
     bool x, y, o;
     int NUM_FRAMES;
     bool O, P, R, M, S;
     int c;
+    char *char_sched_type = nullptr;
     char *s = nullptr;
     std::string inputfile_name;
     std::string randfile_name;
     std::string line;
 
     // Arg parsing
-    while ((c = getopt(argc, argv, "faxyo:")) != -1)
+    while ((c = getopt(argc, argv, "f:a:o:xy")) != -1)
     {
         switch (c)
         {
         case 'f':
-            NUM_FRAMES = (int)optarg;
+            NUM_FRAMES = atoi(optarg);
             break;
         case 'a':
-            a = true;
+            char_sched_type = optarg;
             break;
         case 'x':
             x = true;
@@ -88,9 +88,10 @@ int main(int argc, char **argv)
     inputfile_name = argv[optind];
     randfile_name = argv[optind + 1];
 
+    // Process rfile
     int r_array_size;
     std::ifstream rfile;
-    rfile.open(randfile_name);
-
+    // rfile.open(randfile_name);
+    printf("Num Frames: %d, Sched Type: %s\n", NUM_FRAMES, char_sched_type);
     return 0;
 }
