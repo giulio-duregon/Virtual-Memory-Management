@@ -1,0 +1,10 @@
+{
+    "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/Users/giulio/OS-Lab3",
+            "binaryPath": "/Users/giulio/OS-Lab3/des_mmu",
+            "binaryArgs": []
+        }
+    ]
+}
