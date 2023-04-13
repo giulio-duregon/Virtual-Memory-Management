@@ -115,7 +115,19 @@ int main(int argc, char **argv)
     // Process rfile
     int r_array_size;
     std::ifstream rfile;
-    // rfile.open(randfile_name);
+    rfile.open(randfile_name);
+
+    // Get Random Array Size
+    rfile >> r_array_size;
+
+    // Throw all the values of the array in
+    int offset = 0;
+    int *randvals{new int[r_array_size]{}};
+    for (int i = 0; i < r_array_size; i++)
+    {
+        rfile >> randvals[i];
+    }
+    rfile.close();
 
     return 0;
 }
