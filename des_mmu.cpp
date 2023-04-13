@@ -42,10 +42,10 @@ int main(int argc, char **argv)
     algorithms (not all algorithms have the details described in more detail below)
     -------------------------------------------------------------------------------
     */
-    bool x, y, o;
-    int NUM_FRAMES;
-    bool O, P, R, M, S;
+    bool O, P, F, S, x, y, a;
+    const char *optional_args;
     int c;
+    int NUM_FRAMES;
     char *char_sched_type = nullptr;
     char *s = nullptr;
     std::string inputfile_name;
@@ -63,18 +63,9 @@ int main(int argc, char **argv)
         case 'a':
             char_sched_type = optarg;
             break;
-        case 'x':
-            x = true;
-            break;
-        case 'y':
-            y = true;
-            break;
 
         case 'o':
-            break;
-
-        case 's':
-            s = optarg;
+            optional_args = optarg;
             break;
 
         case '?':
@@ -84,14 +75,47 @@ int main(int argc, char **argv)
         }
     }
 
+    // Parse optional args
+    for (int i = 0; optional_args[i] != NULL; i++)
+    {
+        switch (std::toupper(optional_args[i]))
+        {
+        case 'O':
+            O = true;
+            break;
+        case 'P':
+            P = true;
+            break;
+        case 'F':
+            F = true;
+            break;
+        case 'S':
+            S = true;
+            break;
+        case 'X':
+            x = true;
+            break;
+        case 'Y':
+            y = true;
+            break;
+        case 'A':
+            a = true;
+            break;
+        }
+    }
+
     // Grab input file name, random file name
     inputfile_name = argv[optind];
     randfile_name = argv[optind + 1];
+
+    // To delete
+    printf("Num Frames: %d, Sched Type: %s, Input Filename: %s, Rfile Name: %s\n", NUM_FRAMES, char_sched_type, inputfile_name.c_str(), randfile_name.c_str());
+    printf("Optional Args: %s: A %d Y %d X %d S %d F %d P %d O %d \n", optional_args, a, y, x, S, F, P, O);
 
     // Process rfile
     int r_array_size;
     std::ifstream rfile;
     // rfile.open(randfile_name);
-    printf("Num Frames: %d, Sched Type: %s\n", NUM_FRAMES, char_sched_type);
+
     return 0;
 }
