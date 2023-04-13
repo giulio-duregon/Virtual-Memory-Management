@@ -42,9 +42,9 @@ public:
         FRAME_TABLE = new pte_t[NUM_FRAMES];
     };
     virtual frame_t *select_victim_frame();
-    virtual pte_t *unmap_frame(frame_t frame);
+    pte_t *unmap_frame(frame_t frame);
     // Vpage -> frame
-    virtual void *map_frame(pte_t vpage);
+    void *map_frame(pte_t vpage);
 
 protected:
     pte_t *FRAME_TABLE;
@@ -56,9 +56,6 @@ class FIFO_Pager : Pager
 public:
     FIFO_Pager(int NUM_FRAMES) : Pager(NUM_FRAMES){};
     frame_t *select_victim_frame();
-    pte_t *unmap_frame(frame_t frame);
-    // Vpage -> frame
-    void *map_frame(pte_t vpage);
 };
 
 // Helper function to build pager based on CLI input
