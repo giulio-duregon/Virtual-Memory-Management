@@ -6,7 +6,7 @@
 const unsigned int NUM_PTE = 64;
 
 // VMA Page Bitfield structure -> Contains Protection Flags metadata and frame_number
-typedef struct pte_t
+typedef struct
 {
     // Custom Protection / Flag bits
     unsigned int UNUSED_BITS : 12;
@@ -21,17 +21,17 @@ typedef struct pte_t
 
     // Page number bits (Supports 128 frames as maximum)
     unsigned int frame_number : 7;
-};
+} pte_t;
 
 // Frame Table Struct - Stores Data for Reverse Mapping frame -> page
-typedef struct frame_t
+typedef struct
 {
     // Process id
-    unsigned short process_id;
+    short process_id;
 
     // Page number bits (Supports 128 frames as maximum)
-    unsigned short VMA_frame_number;
-};
+    short VMA_frame_number;
+} frame_t;
 
 class Process
 {
@@ -43,9 +43,21 @@ public:
         pid = counter++;
     }
 
+    void set_vma_range(unsigned int start_vpage, unsigned int end_vpage, unsigned int write_protected, unsigned int file_mapped)
+    {
+        for (int i = start_vpage; i < (end_vpage + 1); i++)
+        {
+            page_table_arr[i].PRESENT = 1;
+            page_table_arr[i].WRITE_PROTECT = write_protected;
+            page_table_arr[i].PAGEDOUT = file_mapped;
+        }
+    }
+
 private:
     unsigned int pid;
     pte_t page_table_arr[NUM_PTE];
 };
+
+int Process::counter = 0;
 
 #endif

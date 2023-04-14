@@ -95,13 +95,13 @@ public:
         FRAME_TABLE[frame_number].VMA_frame_number = vpage_number;
     };
 
-    void *unmap_frame(pte_t &page)
+    void unmap_frame(pte_t &page)
     {
         // Retrieve Physical Frame Number
         int frame_num = page.PAGEDOUT;
 
-        //TODO: Implement logic to handle page getting unmapped from frame
-        // i.e. what to do if modified, referenced etc.
+        // TODO: Implement logic to handle page getting unmapped from frame
+        //  i.e. what to do if modified, referenced etc.
 
         // Clear Physical Frame
         clear_mapping(frame_num);
@@ -117,8 +117,8 @@ public:
         frame_t frame = FRAME_TABLE[frame_number];
 
         // Reset frame Numbers
-        frame.process_id = NULL;
-        frame.VMA_frame_number = NULL;
+        frame.process_id = -1;
+        frame.VMA_frame_number = -1;
     }
     PAGER_TYPES ptype;
 
@@ -132,7 +132,26 @@ class FIFO_Pager : Pager
 {
 public:
     FIFO_Pager(int NUM_FRAMES) : Pager(NUM_FRAMES, FIFO){};
-    frame_t *select_victim_frame() { printf("Something"); };
+    frame_t *select_victim_frame()
+    {
+        int free_frame_num;
+        frame_t *free_frame = nullptr;
+        if (free_list.empty())
+        {
+            // TODO: Implement FIFO "Clock-Like" Selection Logic
+            printf("Todo!\n");
+        }
+        else
+        {
+            // Retrieve the frame_t from free list
+            free_frame_num = free_list.front();
+
+            // Remove value from free list
+            free_list.pop_front();
+            free_frame = &FRAME_TABLE[free_frame_num];
+        }
+        return free_frame;
+    };
 };
 
 // Helper function to build pager based on CLI input

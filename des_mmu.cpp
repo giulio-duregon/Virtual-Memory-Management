@@ -49,11 +49,11 @@ int main(int argc, char **argv)
     int c;
     int NUM_FRAMES;
     char *char_sched_type = nullptr;
-    char *s = nullptr;
     std::string inputfile_name;
     std::string randfile_name;
     std::string line;
     Pager *THE_PAGER;
+    Process *process_arr;
 
     // Arg parsing
     while ((c = getopt(argc, argv, "f:a:o:xy")) != -1)
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     }
 
     // Parse optional args
-    for (int i = 0; optional_args[i] != NULL; i++)
+    for (int i = 0; optional_args[i] != '\0'; i++)
     {
         switch (std::toupper(optional_args[i]))
         {
@@ -135,19 +135,63 @@ int main(int argc, char **argv)
     // Initialize Pager Algorithm from Input
     PAGER_TYPES pager_type = parse_pager_type_from_input(char_sched_type);
     THE_PAGER = build_pager(pager_type, NUM_FRAMES);
-    printf("%d %s", THE_PAGER->ptype, GET_PAGER_NAME_FROM_ENUM(THE_PAGER->ptype));
+    printf("Pager Algo (Enum): %d Pager Algo (Name): %s\n", THE_PAGER->ptype, GET_PAGER_NAME_FROM_ENUM(THE_PAGER->ptype));
 
-    // Read in input from file -> Read in Num Process -> Make VMAs -> make event -> add to event deque
+    // Helper Variables for Process / VMA Construction
     std::ifstream input_file(inputfile_name);
+    Process *curr_process;
+    unsigned int num_processes = 0;
+    unsigned int vma_lines_to_read = 0;
+    int process_read_count = 0;
+    unsigned int start_vpage = 0;
+    unsigned int end_vpage = 0;
+    unsigned int write_protected = 0;
+    unsigned int file_mapped = 0;
+
+    // Read in input from file -> Read in Num Process -> Make VMAs
     if (input_file.is_open())
     {
         while (getline(input_file, line))
         {
-            // TODO:
-            break;
+            // Ignore line comments
+            if (!line.c_str()[0] == '#')
+            {
+                // Get num processes (Only Once)
+                if (!num_processes)
+                {
+                    // Read in number of processes
+                    sscanf(line.c_str(), "%d", &num_processes);
+
+                    // Initiliaze Process Array
+                    process_arr = new Process[num_processes];
+                }
+                else if (process_read_count < num_processes)
+                {
+                    // Get how many lines of VMAs are present for process
+                    sscanf(line.c_str(), "%d", &vma_lines_to_read);
+
+                    // Read in however many VMA lines there are
+                    for (int i = 0; i < vma_lines_to_read; i++)
+                    {
+                        // Get the next line which Contains VMA specs
+                        getline(input_file, line);
+
+                        // Read in VMA Specifications
+                        sscanf(line.c_str(), "%d %d %d %d", &start_vpage, &end_vpage, &write_protected, &file_mapped);
+
+                        // Access Process Array and Set the VMA specs in the correct Process's page table
+                        process_arr[i].set_vma_range(start_vpage, end_vpage, write_protected, file_mapped);
+                    }
+                    process_read_count++;
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
-        input_file.close();
     }
 
+    printf("Num Processes: %d\n", num_processes);
     return 0;
 }
