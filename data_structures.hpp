@@ -9,7 +9,7 @@ const unsigned int NUM_PTE = 64;
 typedef struct pte_t
 {
     // Custom Protection / Flag bits
-    unsigned int UNUSED : 12;
+    unsigned int UNUSED_BITS : 12;
     unsigned int PID : 8;
 
     // Required Protection / Flag Bits

@@ -2,6 +2,8 @@
 #include <fstream>
 #include <string>
 #include <getopt.h>
+#include "data_structures.hpp"
+#include "mmu_pagers.hpp"
 
 void update_offset(int &offset, int array_size)
 {
@@ -51,6 +53,7 @@ int main(int argc, char **argv)
     std::string inputfile_name;
     std::string randfile_name;
     std::string line;
+    Pager *THE_PAGER;
 
     // Arg parsing
     while ((c = getopt(argc, argv, "f:a:o:xy")) != -1)
@@ -120,7 +123,7 @@ int main(int argc, char **argv)
     // Get Random Array Size
     rfile >> r_array_size;
 
-    // Throw all the values of the array in
+    // Throw all the values of the file into array
     int offset = 0;
     int *randvals{new int[r_array_size]{}};
     for (int i = 0; i < r_array_size; i++)
@@ -128,6 +131,11 @@ int main(int argc, char **argv)
         rfile >> randvals[i];
     }
     rfile.close();
+
+    // Initialize Pager Algorithm from Input
+    PAGER_TYPES pager_type = parse_pager_type_from_input(char_sched_type);
+    THE_PAGER = build_pager(pager_type, NUM_FRAMES);
+    printf("%d %s", THE_PAGER->ptype, GET_PAGER_NAME_FROM_ENUM(THE_PAGER->ptype));
 
     // Read in input from file -> Read in Num Process -> Make VMAs -> make event -> add to event deque
     std::ifstream input_file(inputfile_name);
@@ -140,5 +148,6 @@ int main(int argc, char **argv)
         }
         input_file.close();
     }
+
     return 0;
 }
