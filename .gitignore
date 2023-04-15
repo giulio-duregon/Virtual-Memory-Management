@@ -1,6 +1,7 @@
 des_mmu
 in*
 gradeit*
+temp
 refout*
 runit*
 # Prerequisites

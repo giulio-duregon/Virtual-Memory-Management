@@ -41,9 +41,10 @@ public:
     Process()
     {
         pid = counter++;
+        page_table_arr = new pte_t[NUM_PTE];
     }
 
-    void set_vma_range(unsigned int start_vpage, unsigned int end_vpage, unsigned int write_protected, unsigned int file_mapped)
+    void set_vma_range(int start_vpage, int end_vpage, int write_protected, int file_mapped)
     {
         for (int i = start_vpage; i < (end_vpage + 1); i++)
         {
@@ -53,9 +54,18 @@ public:
         }
     }
 
+    void print_process_table()
+    {
+        for (int i = 0; i < NUM_PTE; i++)
+        {
+            printf("%s \n", page_table_arr[i].PRESENT ? '#'
+                                                      : '-');
+        }
+    }
+
 private:
     unsigned int pid;
-    pte_t page_table_arr[NUM_PTE];
+    pte_t *page_table_arr;
 };
 
 int Process::counter = 0;

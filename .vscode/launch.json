@@ -10,11 +10,12 @@
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
             "args": [
-                "-v",
-                "-s",
-                "E4",
-                "./input3",
-                "./rfile"
+                "-o",
+                "OPFS",
+                "-a",
+                "f",
+                "in1",
+                "rfile"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
