@@ -61,7 +61,8 @@ public:
 
         for (int i = 0; i < NUM_PTE; i++)
         {
-            printf("%s", ((page_table_arr[i].PRESENT) ? hashtag.c_str() : dash.c_str()));
+            const char *present_output = page_table_arr[i].PRESENT ? hashtag.c_str() : dash.c_str();
+            printf("%s", present_output);
         }
         printf("\n");
     }
