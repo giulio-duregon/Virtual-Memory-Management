@@ -1,3 +1,4 @@
+#include <iostream>
 
 #ifndef DATA_STRUCTURES
 #define DATA_STRUCTURES
@@ -41,7 +42,6 @@ public:
     Process()
     {
         pid = counter++;
-        page_table_arr = new pte_t[NUM_PTE];
     }
 
     void set_vma_range(int start_vpage, int end_vpage, int write_protected, int file_mapped)
@@ -56,16 +56,19 @@ public:
 
     void print_process_table()
     {
+        std::string hashtag = "#";
+        std::string dash = "-";
+
         for (int i = 0; i < NUM_PTE; i++)
         {
-            printf("%s \n", page_table_arr[i].PRESENT ? '#'
-                                                      : '-');
+            printf("%s", ((page_table_arr[i].PRESENT) ? hashtag.c_str() : dash.c_str()));
         }
+        printf("\n");
     }
 
 private:
     unsigned int pid;
-    pte_t *page_table_arr;
+    pte_t page_table_arr[NUM_PTE];
 };
 
 int Process::counter = 0;

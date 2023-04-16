@@ -154,7 +154,7 @@ int main(int argc, char **argv)
         while (getline(input_file, line))
         {
             // Ignore line comments
-            if (!line.c_str()[0] == '#')
+            if (line.c_str()[0] != '#')
             {
                 // Get num processes (Only Once)
                 if (!num_processes)
@@ -180,7 +180,8 @@ int main(int argc, char **argv)
                         sscanf(line.c_str(), "%d %d %d %d", &start_vpage, &end_vpage, &write_protected, &file_mapped);
 
                         // Access Process Array and Set the VMA specs in the correct Process's page table
-                        process_arr[i].set_vma_range(start_vpage, end_vpage, write_protected, file_mapped);
+                        Process *new_process = &process_arr[i];
+                        new_process->set_vma_range(start_vpage, end_vpage, write_protected, file_mapped);
                     }
                     process_read_count++;
                 }
@@ -193,5 +194,7 @@ int main(int argc, char **argv)
     }
 
     printf("Num Processes: %d\n", num_processes);
+    Process temp = process_arr[0];
+    temp.print_process_table();
     return 0;
 }

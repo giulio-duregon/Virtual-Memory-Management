@@ -36,3 +36,5 @@ runit*
 *.exe
 *.out
 *.app
+.DS_Store
+temp.cpp
