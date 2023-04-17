@@ -6,11 +6,21 @@
 // Max number of page table entries
 const unsigned int NUM_PTE = 64;
 
+// VMA Range For Lazy Page initialization
+typedef struct
+{
+    unsigned int START;
+    unsigned int END;
+    unsigned int WRITE_PROTECT : 1;
+    unsigned int PAGEDOUT : 1;
+} vma_range;
+
 // VMA Page Bitfield structure -> Contains Protection Flags metadata and frame_number
 typedef struct
 {
     // Custom Protection / Flag bits
-    unsigned int UNUSED_BITS : 12;
+    unsigned int UNUSED_BITS : 11;
+    unsigned int EXISTS : 1;
     unsigned int PID : 8;
 
     // Required Protection / Flag Bits
@@ -44,16 +54,39 @@ public:
         pid = counter++;
     }
 
-    void set_vma_range(int start_vpage, int end_vpage, int write_protected, int file_mapped)
+    // Initializes array of VMA Ranges used for PTE creation on pagefault
+    void init_vma(const int num_vmas_)
     {
-        for (int i = start_vpage; i < (end_vpage + 1); i++)
-        {
-            page_table_arr[i].PRESENT = 1;
-            page_table_arr[i].WRITE_PROTECT = write_protected;
-            page_table_arr[i].PAGEDOUT = file_mapped;
-        }
+        num_vmas = num_vmas_;
+        vma_arr = new vma_range[num_vmas];
     }
 
+    // Adds VMA range specs per input to the VMA array
+    void add_vma(const unsigned int vma_num, const int start_vpage, const int end_vpage, const int write_protected, const int file_mapped)
+    {
+        // Set VMA range (NOT PTE) in Process
+        vma_arr[vma_num].START = start_vpage;
+        vma_arr[vma_num].END = end_vpage;
+        vma_arr[vma_num]
+            .WRITE_PROTECT = write_protected;
+        vma_arr[vma_num].PAGEDOUT = file_mapped;
+    }
+
+    // Helper function to check if a VMA exists on pagefault
+    bool vma_exists(const unsigned int vma_query)
+    {
+        for (int i = 0; i < num_vmas; i++)
+        {
+            vma_range temp = vma_arr[i];
+            if (vma_query >= temp.START && vma_query <= temp.END)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // TODO: Update for desired output
     void print_process_table()
     {
         std::string hashtag = "#";
@@ -67,8 +100,21 @@ public:
         printf("\n");
     }
 
+    // Temp function to help validate input
+    void print_vma_ranges()
+    {
+        printf("Total Number of VMA Ranges: %d\n", num_vmas);
+        for (int i = 0; i < num_vmas; i++)
+        {
+            printf("Start: %d Stop: %d Write: %d File: %d\n",
+                   vma_arr[i].START, vma_arr[i].END, vma_arr[i].WRITE_PROTECT, vma_arr[i].PAGEDOUT);
+        }
+    }
+
 private:
     unsigned int pid;
+    unsigned int num_vmas;
+    vma_range *vma_arr;
     pte_t page_table_arr[NUM_PTE];
 };
 

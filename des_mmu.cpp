@@ -166,9 +166,9 @@ int main(int argc, char **argv)
             {
                 // Get how many lines of VMAs are present for process
                 sscanf(line.c_str(), "%d", &vma_lines_to_read);
-
+                process_arr[process_read_count].init_vma(vma_lines_to_read);
                 // Read in however many VMA lines there are
-                for (int i = 0; i < vma_lines_to_read; i++)
+                for (int vma_num = 0; vma_num < vma_lines_to_read; vma_num++)
                 {
                     // Get the next line which Contains VMA specs
                     getline(input_file, line);
@@ -177,7 +177,7 @@ int main(int argc, char **argv)
                     sscanf(line.c_str(), "%d %d %d %d", &start_vpage, &end_vpage, &write_protected, &file_mapped);
 
                     // Access Process Array and Set the VMA specs in the correct Process's page table
-                    process_arr[i].set_vma_range(start_vpage, end_vpage, write_protected, file_mapped);
+                    process_arr[process_read_count].add_vma(vma_num, start_vpage, end_vpage, write_protected, file_mapped);
                 }
                 process_read_count++;
             }
@@ -188,8 +188,13 @@ int main(int argc, char **argv)
         }
     }
 
+    // TODO: Delete Later used to check input is read correctly
     printf("Num Processes: %d\n", num_processes);
-    Process temp = process_arr[0];
-    temp.print_process_table();
+    process_arr[0].print_process_table();
+    process_arr[0].print_vma_ranges();
+    // ####################################
+    // ######## Simulation Begins #########
+    // ###################################
+
     return 0;
 }
