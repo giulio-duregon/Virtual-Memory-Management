@@ -73,8 +73,9 @@ public:
 class Pager
 {
 public:
-    Pager(int NUM_FRAMES, PAGER_TYPES ptype_)
+    Pager(int NUM_FRAMES_, PAGER_TYPES ptype_)
     {
+        NUM_FRAMES = NUM_FRAMES_;
         ptype = ptype_;
 
         // Dynamically create the frame table array based on input args
@@ -114,32 +115,35 @@ public:
 
     // Maps a physical frame to a VMA page
     // pte_t struct -> frame_t struct
-    void map_frame(Process *process, pte_t &vpage, unsigned int vpage_number, unsigned int frame_number, unsigned int pid, bool O)
+    void map_frame(Process *process, int vpage_num, frame_t *free_frame, bool O)
     {
+        pte_t *vpage = process->get_vpage(vpage_num);
         // Update VMA page mapping
-        vpage.frame_number = frame_number;
+        vpage->frame_number = free_frame->frame_number;
 
         // TODO: Some other logic about modified / referenced bits
+        vpage->PRESENT = 1;
+        vpage->REFERENCED = 1;
 
         // See if page has never been accessed, and is not file mapped
-        if ((vpage.NOT_FIRST_ACCESS == 0) && (vpage.FILEMAPPED == 0))
+        if ((vpage->NOT_FIRST_ACCESS == 0) && (vpage->FILEMAPPED == 0))
         {
             if (O)
             {
-                printf("ZEROS\n");
+                printf("ZERO\n");
             }
             // An operating system must zero pages on first access (unless filemapped) to guarantee consistent behavior
             process->allocate_cost(ZEROS);
-            vpage.NOT_FIRST_ACCESS = 1;
+            vpage->NOT_FIRST_ACCESS = 1;
         }
         // Update physical frame to reverse map to page
-        FRAME_TABLE[frame_number].process_id = pid;
-        FRAME_TABLE[frame_number].VMA_page_number = vpage_number;
+        FRAME_TABLE[free_frame->frame_number].process_id = process->get_pid();
+        FRAME_TABLE[free_frame->frame_number].VMA_page_number = vpage_num;
 
         // If output option, display filenumber that is mapped
         if (O)
         {
-            printf("MAP %d\n", frame_number);
+            printf("MAP %d\n", free_frame->frame_number);
         }
     };
 
@@ -223,6 +227,7 @@ public:
     PAGER_TYPES ptype;
 
 protected:
+    int NUM_FRAMES;
     frame_t *FRAME_TABLE;
     std::deque<frame_t *> free_list;
     unsigned long long cost = 0;
@@ -235,34 +240,42 @@ protected:
 class FIFO_Pager : Pager
 {
 public:
-    FIFO_Pager(int NUM_FRAMES) : Pager(NUM_FRAMES, FIFO){};
+    FIFO_Pager(int NUM_FRAMES, bool a_) : Pager(NUM_FRAMES, FIFO) { a = a_; };
     frame_t *select_victim_frame()
     {
+        // Select victim frame in clocklike fashion indexing into Frame Table
         frame_t *free_frame = nullptr;
-        if (free_list.empty())
-        {
-            // TODO: Implement FIFO "Clock-Like" Selection Logic
-            printf("Todo!\n");
-        }
-        else
-        {
-            // Retrieve the frame_t from free list
-            free_frame = free_list.front();
+        free_frame = &FRAME_TABLE[CLOCK_HAND];
 
-            // Remove value from free list
-            free_list.pop_front();
+        // If option selected, output victim frame
+        if (a)
+        {
+            printf("ASELECT: %d\n", CLOCK_HAND);
         }
+        increment_clock_hand();
         return free_frame;
     };
+
+private:
+    bool a;
+    void increment_clock_hand()
+    {
+        CLOCK_HAND++;
+        if (CLOCK_HAND >= NUM_FRAMES)
+        {
+            CLOCK_HAND = 0;
+        }
+    }
+    unsigned int CLOCK_HAND = 0;
 };
 
 // Helper function to build pager based on CLI input
-Pager *build_pager(PAGER_TYPES pager_type, int NUM_FRAMES)
+Pager *build_pager(PAGER_TYPES pager_type, int NUM_FRAMES, bool a, bool O)
 {
     switch (pager_type)
     {
     case FIFO:
-        return (Pager *)new FIFO_Pager(NUM_FRAMES);
+        return (Pager *)new FIFO_Pager(NUM_FRAMES, a);
     case Random:
         throw new NotImplemented;
     case Clock:
