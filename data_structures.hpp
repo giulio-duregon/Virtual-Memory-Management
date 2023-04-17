@@ -53,9 +53,10 @@ typedef struct
 typedef struct
 {
     // Custom Protection / Flag bits
-    unsigned int UNUSED_BITS : 10;
+    unsigned int UNUSED_BITS : 9;
     unsigned int EXISTS : 1;
     unsigned int PID : 8;
+    unsigned int NOT_FIRST_ACCESS : 1;
 
     // Required Protection / Flag Bits
     unsigned int PAGEDOUT : 1;

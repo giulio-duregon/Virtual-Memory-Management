@@ -114,16 +114,33 @@ public:
 
     // Maps a physical frame to a VMA page
     // pte_t struct -> frame_t struct
-    void map_frame(pte_t &vpage, unsigned int vpage_number, unsigned int frame_number, unsigned int pid)
+    void map_frame(Process *process, pte_t &vpage, unsigned int vpage_number, unsigned int frame_number, unsigned int pid, bool O)
     {
         // Update VMA page mapping
         vpage.frame_number = frame_number;
 
         // TODO: Some other logic about modified / referenced bits
 
+        // See if page has never been accessed, and is not file mapped
+        if ((vpage.NOT_FIRST_ACCESS == 0) && (vpage.FILEMAPPED == 0))
+        {
+            if (O)
+            {
+                printf("ZEROS\n");
+            }
+            // An operating system must zero pages on first access (unless filemapped) to guarantee consistent behavior
+            process->allocate_cost(ZEROS);
+            vpage.NOT_FIRST_ACCESS = 1;
+        }
         // Update physical frame to reverse map to page
         FRAME_TABLE[frame_number].process_id = pid;
         FRAME_TABLE[frame_number].VMA_page_number = vpage_number;
+
+        // If output option, display filenumber that is mapped
+        if (O)
+        {
+            printf("MAP %d\n", frame_number);
+        }
     };
 
     void unmap_frame(Process *process, pte_t &page, bool O)
@@ -135,7 +152,7 @@ public:
 
         if (O)
         {
-            printf("UNMAP %d:%d", pid, vpage);
+            printf("UNMAP %d:%d\n", pid, vpage);
         }
 
         // TODO: Implement logic to handle page getting unmapped from frame
