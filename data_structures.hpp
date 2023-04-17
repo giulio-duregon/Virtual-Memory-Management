@@ -46,23 +46,24 @@ typedef struct
     unsigned int START;
     unsigned int END;
     unsigned int WRITE_PROTECT : 1;
-    unsigned int PAGEDOUT : 1; // File mapped Flag
+    unsigned int FILEMAPPED : 1; // File mapped Flag
 } vma_range;
 
 // VMA Page Bitfield structure -> Contains Protection Flags metadata and frame_number
 typedef struct
 {
     // Custom Protection / Flag bits
-    unsigned int UNUSED_BITS : 11;
+    unsigned int UNUSED_BITS : 10;
     unsigned int EXISTS : 1;
     unsigned int PID : 8;
 
     // Required Protection / Flag Bits
+    unsigned int PAGEDOUT : 1;
     unsigned int PRESENT : 1;
     unsigned int REFERENCED : 1;
     unsigned int MODIFIED : 1;
     unsigned int WRITE_PROTECT : 1;
-    unsigned int PAGEDOUT : 1; // File mapped Flag
+    unsigned int FILEMAPPED : 1;
 
     // Page number bits (Supports 128 frames as maximum)
     unsigned int frame_number : 7;
@@ -75,10 +76,10 @@ typedef struct
     unsigned int frame_number : 7;
 
     // Process id -- Extra bits used here so sizeof(frame_t) == sizeof(pte_t)
-    unsigned int process_id : 19;
+    int process_id : 17;
 
-    // Frame number bits (Supports 64 frames as maximum)
-    unsigned int VMA_page_number : 6;
+    // Frame number bits (Supports 64 frames as maximum) -> using signed for -1 to indicate free
+    int VMA_page_number : 8;
 } frame_t;
 
 class Process
@@ -106,7 +107,7 @@ public:
         vma_arr[vma_num].END = end_vpage;
         vma_arr[vma_num]
             .WRITE_PROTECT = write_protected;
-        vma_arr[vma_num].PAGEDOUT = file_mapped;
+        vma_arr[vma_num].FILEMAPPED = file_mapped;
     }
 
     // Helper function to check if a VMA exists on pagefault
@@ -176,7 +177,7 @@ public:
         for (int i = 0; i < num_vmas; i++)
         {
             printf("Start: %d Stop: %d Write: %d File: %d\n",
-                   vma_arr[i].START, vma_arr[i].END, vma_arr[i].WRITE_PROTECT, vma_arr[i].PAGEDOUT);
+                   vma_arr[i].START, vma_arr[i].END, vma_arr[i].WRITE_PROTECT, vma_arr[i].FILEMAPPED);
         }
     }
 
@@ -212,6 +213,11 @@ public:
             segprot += int_segprot;
             break;
         }
+    }
+
+    unsigned int get_pid()
+    {
+        return pid;
     }
 
 private:
