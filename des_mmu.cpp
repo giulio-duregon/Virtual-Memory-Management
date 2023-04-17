@@ -25,7 +25,7 @@ int rand_burst(int frame_t_size, int *randvals, int &offset, int array_size)
     return (randvals[offset] % frame_t_size);
 }
 
-void read_write_logic(Pager *THE_PAGER, Process *CURRENT_PROCESS, const int vpage, const bool O)
+void read_write_logic(Pager *THE_PAGER, Process *CURRENT_PROCESS, const int vpage)
 {
     // Add Read/Write cycle cost to pager for accounting
     THE_PAGER->allocate_cost(READ_WRITE);
@@ -45,8 +45,16 @@ void read_write_logic(Pager *THE_PAGER, Process *CURRENT_PROCESS, const int vpag
         {
             // Page can be accessed, so it must be allocated
             frame_t *frame = THE_PAGER->get_frame();
+
+            // See if the frame is coming from free frames or victim frames
+            if (frame->process_id != -1)
+            {
+                // Unmap Victim Frame
+                THE_PAGER->unmap_frame(frame->process_id, frame->VMA_page_number);
+            }
+
             // Update referenced bit, frame number on VPage
-            THE_PAGER->map_frame(CURRENT_PROCESS, vpage, frame, O);
+            THE_PAGER->map_frame(CURRENT_PROCESS, vpage, frame);
         }
     }
 }
@@ -159,7 +167,7 @@ int main(int argc, char **argv)
 
     // Initialize Pager Algorithm from Input
     PAGER_TYPES pager_type = parse_pager_type_from_input(char_sched_type);
-    THE_PAGER = build_pager(pager_type, NUM_FRAMES, a, O);
+    THE_PAGER = build_pager(pager_type, NUM_FRAMES, O, a);
     printf("Pager Algo (Enum): %d Pager Algo (Name): %s\n", THE_PAGER->ptype, GET_PAGER_NAME_FROM_ENUM(THE_PAGER->ptype));
 
     // Helper Variables for Process / VMA Construction
@@ -214,6 +222,9 @@ int main(int argc, char **argv)
     }
     input_file.close();
 
+    // Add process arr to pointer for easier accounting
+    THE_PAGER->init_process_metadata(num_processes, process_arr);
+
     // TODO: Delete Later used to check input is read correctly
     printf("Num Processes: %d\n", num_processes);
     process_arr[0].print_process_table();
@@ -263,10 +274,10 @@ int main(int argc, char **argv)
                 THE_PAGER->allocate_cost(PROC_EXIT);
                 break;
             case 'r':
-                read_write_logic(THE_PAGER, CURRENT_PROCESS, vpage, O);
+                read_write_logic(THE_PAGER, CURRENT_PROCESS, vpage);
                 break;
             case 'w':
-                read_write_logic(THE_PAGER, CURRENT_PROCESS, vpage, O);
+                read_write_logic(THE_PAGER, CURRENT_PROCESS, vpage);
 
                 // Check if write protect is enabled, if so raise SEGPROT
                 if (CURRENT_PROCESS->write_protect_enabled(vpage))

@@ -77,10 +77,10 @@ typedef struct
     unsigned int frame_number : 7;
 
     // Process id -- Extra bits used here so sizeof(frame_t) == sizeof(pte_t)
-    int process_id : 17;
+    short process_id = -1;
 
     // Frame number bits (Supports 64 frames as maximum) -> using signed for -1 to indicate free
-    int VMA_page_number : 8;
+    short VMA_page_number = -1;
 } frame_t;
 
 class Process

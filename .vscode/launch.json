@@ -10,6 +10,8 @@
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
             "args": [
+                "-f",
+                "4",
                 "-o",
                 "aOPFS",
                 "-a",

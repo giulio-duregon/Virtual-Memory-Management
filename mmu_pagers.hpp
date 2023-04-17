@@ -73,10 +73,11 @@ public:
 class Pager
 {
 public:
-    Pager(int NUM_FRAMES_, PAGER_TYPES ptype_)
+    Pager(int NUM_FRAMES_, PAGER_TYPES ptype_, bool O_)
     {
         NUM_FRAMES = NUM_FRAMES_;
         ptype = ptype_;
+        O = O_;
 
         // Dynamically create the frame table array based on input args
         FRAME_TABLE = new frame_t[NUM_FRAMES];
@@ -91,6 +92,12 @@ public:
             free_list.push_back(&FRAME_TABLE[i]);
         }
     };
+
+    void init_process_metadata(int num_processes_, Process *process_arr_)
+    {
+        process_arr = process_arr_;
+        num_processes = num_processes_;
+    }
 
     // Main Functionality: Get a frame from the free frames queue
     // If one does not exist, call select_victim_frame
@@ -115,7 +122,7 @@ public:
 
     // Maps a physical frame to a VMA page
     // pte_t struct -> frame_t struct
-    void map_frame(Process *process, int vpage_num, frame_t *free_frame, bool O)
+    void map_frame(Process *process, int vpage_num, frame_t *free_frame)
     {
         pte_t *vpage = process->get_vpage(vpage_num);
         // Update VMA page mapping
@@ -147,11 +154,14 @@ public:
         }
     };
 
-    void unmap_frame(Process *process, pte_t &page, bool O)
+    void unmap_frame(unsigned int pid, unsigned int old_page_num)
     {
-        unsigned int pid = process->get_pid();
+        // Get correct pointer to victim process + frame to be unmapped
+        Process *process = &process_arr[pid];
+        pte_t *page = process->get_vpage(old_page_num);
+
         // Retrieve Physical Frame Number
-        int frame_num = page.frame_number;
+        int frame_num = page->frame_number;
         int vpage = FRAME_TABLE[frame_num].VMA_page_number;
 
         if (O)
@@ -163,9 +173,9 @@ public:
         //  i.e. what to do if modified, referenced etc.
 
         // If modified it must be written out
-        if (page.MODIFIED)
+        if (page->MODIFIED)
         {
-            if (page.FILEMAPPED)
+            if (page->FILEMAPPED)
             {
                 process->allocate_cost(FOUTS);
             }
@@ -175,15 +185,15 @@ public:
             }
 
             // Reset modified bit
-            page.MODIFIED = 0;
+            page->MODIFIED = 0;
 
             // Set PAGEDOUT bit
-            page.PAGEDOUT = 1;
+            page->PAGEDOUT = 1;
         }
         // Clear Physical Frame mapping
         clear_mapping(frame_num);
 
-        page.PRESENT = 0;
+        page->PRESENT = 0;
     };
 
     // Clears previous physical frames (reverse) mapping
@@ -228,19 +238,22 @@ public:
 
 protected:
     int NUM_FRAMES;
+    bool O;
     frame_t *FRAME_TABLE;
     std::deque<frame_t *> free_list;
     unsigned long long cost = 0;
     unsigned long inst_count = 0;
     unsigned long ctx_switches = 0;
     unsigned long process_exits = 0;
+    Process *process_arr;
+    int num_processes = 0;
 };
 
 // FIFO Pager Implementation
 class FIFO_Pager : Pager
 {
 public:
-    FIFO_Pager(int NUM_FRAMES, bool a_) : Pager(NUM_FRAMES, FIFO) { a = a_; };
+    FIFO_Pager(int NUM_FRAMES, bool O, bool a_) : Pager(NUM_FRAMES, FIFO, O) { a = a_; };
     frame_t *select_victim_frame()
     {
         // Select victim frame in clocklike fashion indexing into Frame Table
@@ -270,12 +283,12 @@ private:
 };
 
 // Helper function to build pager based on CLI input
-Pager *build_pager(PAGER_TYPES pager_type, int NUM_FRAMES, bool a, bool O)
+Pager *build_pager(PAGER_TYPES pager_type, int NUM_FRAMES, bool O, bool a)
 {
     switch (pager_type)
     {
     case FIFO:
-        return (Pager *)new FIFO_Pager(NUM_FRAMES, a);
+        return (Pager *)new FIFO_Pager(NUM_FRAMES, O, a);
     case Random:
         throw new NotImplemented;
     case Clock:
