@@ -23,7 +23,7 @@ const enum PROC_CYCLES {
     SEGPROT
 };
 
-// VALUES
+// VALUES (Cant Store in ENUM as 410 occurs twice)
 const int int_readwrite = 1;
 const int int_contextswitch = 130;
 const int int_procexit = 1230;
@@ -46,7 +46,7 @@ typedef struct
     unsigned int START;
     unsigned int END;
     unsigned int WRITE_PROTECT : 1;
-    unsigned int PAGEDOUT : 1;
+    unsigned int PAGEDOUT : 1; // File mapped Flag
 } vma_range;
 
 // VMA Page Bitfield structure -> Contains Protection Flags metadata and frame_number
@@ -62,7 +62,7 @@ typedef struct
     unsigned int REFERENCED : 1;
     unsigned int MODIFIED : 1;
     unsigned int WRITE_PROTECT : 1;
-    unsigned int PAGEDOUT : 1;
+    unsigned int PAGEDOUT : 1; // File mapped Flag
 
     // Page number bits (Supports 128 frames as maximum)
     unsigned int frame_number : 7;
@@ -72,13 +72,13 @@ typedef struct
 typedef struct
 {
     // Frame number
-    unsigned int frame_number;
+    unsigned int frame_number : 7;
 
-    // Process id
-    short process_id;
+    // Process id -- Extra bits used here so sizeof(frame_t) == sizeof(pte_t)
+    unsigned int process_id : 19;
 
-    // Page number bits (Supports 128 frames as maximum)
-    short VMA_page_number;
+    // Frame number bits (Supports 64 frames as maximum)
+    unsigned int VMA_page_number : 6;
 } frame_t;
 
 class Process
@@ -138,6 +138,21 @@ public:
         }
         // Otherwise iterate through the VMA ranges saved in the Process spec as metadata
         return vma_exists(vpage);
+    }
+
+    void set_referenced(int vpage)
+    {
+        page_table_arr[vpage].REFERENCED = 1;
+    }
+
+    void set_write(unsigned int vpage)
+    {
+        page_table_arr[vpage].MODIFIED = 1;
+    }
+
+    unsigned int write_protect_enabled(unsigned int vpage)
+    {
+        return page_table_arr[vpage].WRITE_PROTECT;
     }
 
     // TODO: Update for desired output

@@ -15,14 +15,14 @@ void update_offset(int &offset, int array_size)
     }
 }
 
-int rand_burst(int burst, int *randvals, int &offset, int array_size)
+int rand_burst(int frame_t_size, int *randvals, int &offset, int array_size)
 {
     if (offset >= array_size)
     {
         offset = 0;
     }
     // Grab random value
-    return 1 + (randvals[offset] % burst);
+    return (randvals[offset] % frame_t_size);
 }
 
 int main(int argc, char **argv)
@@ -247,6 +247,7 @@ int main(int argc, char **argv)
 
                         // Allocate cost of a segmentation violation
                         CURRENT_PROCESS->allocate_cost(SEGV);
+                        break;
                     }
                     else
                     {
@@ -254,6 +255,16 @@ int main(int argc, char **argv)
                     }
                 }
 
+                // Check if write protect is enabled, if so raise SEGPROT
+                if (CURRENT_PROCESS->write_protect_enabled(vpage))
+                {
+                    // Then we raise a SEGPROT error as we cannot write to this VMA
+                    CURRENT_PROCESS->allocate_cost(SEGPROT);
+                }
+
+                // Update write / ref bits
+                CURRENT_PROCESS->set_referenced(vpage);
+                CURRENT_PROCESS->set_write(vpage);
                 break;
             }
         }
