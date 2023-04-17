@@ -301,9 +301,12 @@ int main(int argc, char **argv)
                 }
                 break;
             case 'r':
+                // Read instruction logic
                 read_write_logic(THE_PAGER, CURRENT_PROCESS, vpage);
+                CURRENT_PROCESS->set_referenced(vpage);
                 break;
             case 'w':
+                // Write instruction logic
                 read_write_logic(THE_PAGER, CURRENT_PROCESS, vpage);
 
                 // Check if write protect is enabled, if so raise SEGPROT
@@ -312,15 +315,33 @@ int main(int argc, char **argv)
                     // Then we raise a SEGPROT error as we cannot write to this VMA
                     CURRENT_PROCESS->allocate_cost(SEGPROT);
                 }
+                else
+                {
+                    // Update Modified if written to successfully
+                    CURRENT_PROCESS->set_write(vpage);
+                }
 
-                // Update write / ref bits
+                // Update ref bit
                 CURRENT_PROCESS->set_referenced(vpage);
-                CURRENT_PROCESS->set_write(vpage);
                 break;
             }
         }
     }
     input_file.close();
-    THE_PAGER->print_total_cost();
+
+    if (P)
+    {
+        THE_PAGER->print_process_ptes();
+    }
+    if (F)
+    {
+        THE_PAGER->print_frame_table();
+    }
+    if (S)
+    {
+        THE_PAGER->print_per_process_stats();
+        THE_PAGER->print_total_cost();
+    }
+
     return 0;
 }

@@ -249,6 +249,44 @@ public:
 
     PAGER_TYPES ptype;
 
+    void print_frame_table()
+    {
+        printf("FT:");
+        for (int i = 0; i < NUM_FRAMES; i++)
+        {
+            int pid = FRAME_TABLE[i].process_id;
+            int page_num = FRAME_TABLE[i].VMA_page_number;
+            if (pid == -1 || page_num == -1)
+            {
+                printf(" * ");
+            }
+            else
+            {
+                printf(" %d:%d ", pid, page_num);
+            }
+        }
+        printf("\n");
+    }
+
+    void print_process_ptes()
+    {
+        for (int i = 0; i < num_processes; i++)
+        {
+            printf("PT[%d]", i);
+            process_arr[i].print_process_table();
+            printf("\n");
+        }
+    }
+
+    void print_per_process_stats()
+    {
+        for (int i = 0; i < num_processes; i++)
+        {
+            printf("PROC[%d]: ", i);
+            process_arr[i].print_stats();
+        }
+    }
+
 protected:
     int NUM_FRAMES;
     bool O;

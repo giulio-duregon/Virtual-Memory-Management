@@ -24,18 +24,19 @@ const enum PROC_CYCLES {
 };
 
 // VALUES (Cant Store in ENUM as 410 occurs twice)
-const int int_readwrite = 1;
-const int int_contextswitch = 130;
-const int int_procexit = 1230;
-const int int_maps = 350;
-const int int_unmaps = 410;
-const int int_ins = 3200;
-const int int_outs = 2750;
-const int int_fins = 2350;
-const int int_fouts = 2800;
-const int int_zeros = 150;
-const int int_segv = 440;
-const int int_segprot = 410;
+// May not be necessry afte rall
+// const int int_readwrite = 1;
+// const int int_contextswitch = 130;
+// const int int_procexit = 1230;
+// const int int_maps = 350;
+// const int int_unmaps = 410;
+// const int int_ins = 3200;
+// const int int_outs = 2750;
+// const int int_fins = 2350;
+// const int int_fouts = 2800;
+// const int int_zeros = 150;
+// const int int_segv = 440;
+// const int int_segprot = 410;
 
 // Max number of page table entries
 const unsigned int NUM_PTE = 64;
@@ -166,10 +167,36 @@ public:
     void print_process_table()
     {
         std::string hashtag = "#";
+        std::string star = "*";
         std::string dash = "-";
+        std::string R = "R";
+        std::string M = "M";
+        std::string S = "S";
 
         for (int i = 0; i < NUM_PTE; i++)
         {
+            pte_t entry = page_table_arr[i];
+            if (entry.PRESENT)
+            {
+                const char *r = entry.REFERENCED ? R.c_str() : dash.c_str();
+                const char *s = entry.PAGEDOUT ? S.c_str() : dash.c_str();
+                const char *m = entry.MODIFIED ? M.c_str() : dash.c_str();
+                printf(" %d:%s%s%s ", i, r, s, m);
+            }
+            else
+            {
+                if (entry.PAGEDOUT)
+                {
+                    // PTEs that are not valid are represented by a ‘#’ if they have been swapped out
+                    printf(" %s ", hashtag.c_str());
+                }
+                else
+                {
+                    // Or a ‘*’ if it does not have a swap area associated with.
+                    printf(" %s ", star.c_str());
+                }
+            }
+
             const char *present_output = page_table_arr[i].PRESENT ? hashtag.c_str() : dash.c_str();
             printf("%s", present_output);
         }
@@ -197,35 +224,39 @@ public:
         switch (cost_type)
         {
         case UNMAPS:
-            unmaps += int_unmaps;
+            unmaps += 1;
             break;
         case MAPS:
-            maps += int_maps;
+            maps += 1;
             break;
         case INS:
-            ins += int_ins;
+            ins += 1;
             break;
         case OUTS:
-            outs += int_outs;
+            outs += 1;
             break;
         case FINS:
-            fins += int_fins;
+            fins += 1;
             break;
         case FOUTS:
-            fouts += int_fouts;
+            fouts += 1;
             break;
         case ZEROS:
-            zeros += int_zeros;
+            zeros += 1;
             break;
         case SEGV:
-            segv += int_segv;
+            segv += 1;
             break;
         case SEGPROT:
-            segprot += int_segprot;
+            segprot += 1;
             break;
         }
     }
 
+    void print_stats()
+    {
+        printf("U=%lu M=%lu I=%lu O=%lu FI=%lu FO=%lu Z=%lu SV=%lu SP=%lu\n", unmaps, maps, ins, outs, fins, fouts, zeros, segv, segprot);
+    }
     unsigned int get_pid()
     {
         return pid;
