@@ -25,6 +25,31 @@ int rand_burst(int frame_t_size, int *randvals, int &offset, int array_size)
     return (randvals[offset] % frame_t_size);
 }
 
+void read_write_logic(Pager *THE_PAGER, Process *CURRENT_PROCESS, const int vpage, const bool O)
+{
+    // Add Read/Write cycle cost to pager for accounting
+    THE_PAGER->allocate_cost(READ_WRITE);
+
+    if (!CURRENT_PROCESS->check_present_valid(vpage))
+    {
+        // Page fault logic
+        if (!CURRENT_PROCESS->vpage_can_be_accessed(vpage))
+        {
+            // TODO: Output SEGV Line?
+
+            // Allocate cost of a segmentation violation
+            CURRENT_PROCESS->allocate_cost(SEGV);
+            return;
+        }
+        else
+        {
+            // Page can be accessed, so it must be allocated
+            frame_t *frame = THE_PAGER->get_frame();
+            // Update referenced bit, frame number on VPage
+            THE_PAGER->map_frame(CURRENT_PROCESS, vpage, frame, O);
+        }
+    }
+}
 int main(int argc, char **argv)
 {
     /* ################### Config Instructions ############################################
@@ -134,7 +159,7 @@ int main(int argc, char **argv)
 
     // Initialize Pager Algorithm from Input
     PAGER_TYPES pager_type = parse_pager_type_from_input(char_sched_type);
-    THE_PAGER = build_pager(pager_type, NUM_FRAMES);
+    THE_PAGER = build_pager(pager_type, NUM_FRAMES, a, O);
     printf("Pager Algo (Enum): %d Pager Algo (Name): %s\n", THE_PAGER->ptype, GET_PAGER_NAME_FROM_ENUM(THE_PAGER->ptype));
 
     // Helper Variables for Process / VMA Construction
@@ -238,30 +263,10 @@ int main(int argc, char **argv)
                 THE_PAGER->allocate_cost(PROC_EXIT);
                 break;
             case 'r':
-                // Add Read/Write cycle cost to pager for accounting
-                THE_PAGER->allocate_cost(READ_WRITE);
+                read_write_logic(THE_PAGER, CURRENT_PROCESS, vpage, O);
                 break;
             case 'w':
-                // Add Read/Write cycle cost to pager for accounting
-                THE_PAGER->allocate_cost(READ_WRITE);
-
-                // Check if Valid/Present -> If not then PAGE FAULT!
-                if (!CURRENT_PROCESS->check_present_valid(vpage))
-                {
-                    // Page fault logic
-                    if (!CURRENT_PROCESS->vpage_can_be_accessed(vpage))
-                    {
-                        // TODO: Output SEGV Line?
-
-                        // Allocate cost of a segmentation violation
-                        CURRENT_PROCESS->allocate_cost(SEGV);
-                        break;
-                    }
-                    else
-                    {
-                        // Page can be accessed, so it must be allocated
-                    }
-                }
+                read_write_logic(THE_PAGER, CURRENT_PROCESS, vpage, O);
 
                 // Check if write protect is enabled, if so raise SEGPROT
                 if (CURRENT_PROCESS->write_protect_enabled(vpage))

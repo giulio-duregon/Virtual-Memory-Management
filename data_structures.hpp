@@ -147,6 +147,11 @@ public:
         page_table_arr[vpage].REFERENCED = 1;
     }
 
+    void set_frame_num(int vpage, int framenum)
+    {
+        page_table_arr[vpage].frame_number = framenum;
+    }
+
     void set_write(unsigned int vpage)
     {
         page_table_arr[vpage].MODIFIED = 1;
@@ -180,6 +185,11 @@ public:
             printf("Start: %d Stop: %d Write: %d File: %d\n",
                    vma_arr[i].START, vma_arr[i].END, vma_arr[i].WRITE_PROTECT, vma_arr[i].FILEMAPPED);
         }
+    }
+
+    pte_t *get_vpage(int vpage_num)
+    {
+        return &page_table_arr[vpage_num];
     }
 
     void allocate_cost(PROC_CYCLES cost_type)
