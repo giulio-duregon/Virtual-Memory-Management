@@ -71,11 +71,14 @@ typedef struct
 // Frame Table Struct - Stores Data for Reverse Mapping frame -> page
 typedef struct
 {
+    // Frame number
+    unsigned int frame_number;
+
     // Process id
     short process_id;
 
     // Page number bits (Supports 128 frames as maximum)
-    short VMA_frame_number;
+    short VMA_page_number;
 } frame_t;
 
 class Process
@@ -118,6 +121,23 @@ public:
             }
         }
         return false;
+    }
+
+    bool check_present_valid(int vpage)
+    {
+        return page_table_arr[vpage].PRESENT;
+    }
+
+    bool vpage_can_be_accessed(int vpage)
+    {
+        // First check the Page table page entry and see if exists has been
+        // Turned on in the bit-field
+        if (page_table_arr[vpage].EXISTS)
+        {
+            return true;
+        }
+        // Otherwise iterate through the VMA ranges saved in the Process spec as metadata
+        return vma_exists(vpage);
     }
 
     // TODO: Update for desired output

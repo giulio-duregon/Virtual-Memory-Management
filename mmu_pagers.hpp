@@ -83,9 +83,29 @@ public:
         // Upon Initialization, All frames are free
         for (int i = 0; i < NUM_FRAMES; i++)
         {
-            free_list.push_back(i);
+            // Assing a frame number
+            FRAME_TABLE[i].frame_number = i;
+
+            // Add it to the free frame queue
+            free_list.push_back(&FRAME_TABLE[i]);
         }
     };
+
+    // Main Functionality: Get a frame from the free frames queue
+    // If one does not exist, call select_victim_frame
+    frame_t *get_frame()
+    {
+        // If we have no free frames, select next victim frame
+        if (free_list.empty())
+        {
+            return select_victim_frame();
+        }
+
+        // If we have free frames, pop & return the first one off
+        frame_t *free_frame = free_list.front();
+        free_list.pop_front();
+        return free_frame;
+    }
 
     // Virtual Function to be implemented by derived classes
     // Selects VMA to be removed from physical frame
@@ -103,7 +123,7 @@ public:
 
         // Update physical frame to reverse map to page
         FRAME_TABLE[frame_number].process_id = pid;
-        FRAME_TABLE[frame_number].VMA_frame_number = vpage_number;
+        FRAME_TABLE[frame_number].VMA_page_number = vpage_number;
     };
 
     void unmap_frame(pte_t &page)
@@ -129,7 +149,7 @@ public:
 
         // Reset frame Numbers
         frame.process_id = -1;
-        frame.VMA_frame_number = -1;
+        frame.VMA_page_number = -1;
     }
 
     void allocate_cost(PAGER_CYCLES cost_type)
@@ -165,7 +185,7 @@ public:
 
 protected:
     frame_t *FRAME_TABLE;
-    std::deque<int> free_list;
+    std::deque<frame_t *> free_list;
     unsigned long long cost = 0;
     unsigned long inst_count = 0;
     unsigned long ctx_switches = 0;
@@ -179,7 +199,6 @@ public:
     FIFO_Pager(int NUM_FRAMES) : Pager(NUM_FRAMES, FIFO){};
     frame_t *select_victim_frame()
     {
-        int free_frame_num;
         frame_t *free_frame = nullptr;
         if (free_list.empty())
         {
@@ -189,11 +208,10 @@ public:
         else
         {
             // Retrieve the frame_t from free list
-            free_frame_num = free_list.front();
+            free_frame = free_list.front();
 
             // Remove value from free list
             free_list.pop_front();
-            free_frame = &FRAME_TABLE[free_frame_num];
         }
         return free_frame;
     };

@@ -202,8 +202,9 @@ int main(int argc, char **argv)
     char operation;
     int vpage;
     int current_process_num;
-    Process *current_process;
+    Process *CURRENT_PROCESS;
     input_file.open(inputfile_name);
+
     // Read instructions
     while (getline(input_file, line))
     {
@@ -221,7 +222,7 @@ int main(int argc, char **argv)
                 // Add context-switching cycle cost to pager for accounting
                 THE_PAGER->allocate_cost(CONTEXT_SWITCH);
                 // Update the pointer to current Process
-                current_process = &process_arr[current_process_num];
+                CURRENT_PROCESS = &process_arr[current_process_num];
                 break;
 
             case 'e':
@@ -235,6 +236,24 @@ int main(int argc, char **argv)
             case 'w':
                 // Add Read/Write cycle cost to pager for accounting
                 THE_PAGER->allocate_cost(READ_WRITE);
+
+                // Check if Valid/Present -> If not then PAGE FAULT!
+                if (!CURRENT_PROCESS->check_present_valid(vpage))
+                {
+                    // Page fault logic
+                    if (!CURRENT_PROCESS->vpage_can_be_accessed(vpage))
+                    {
+                        // TODO: Output SEGV Line?
+
+                        // Allocate cost of a segmentation violation
+                        CURRENT_PROCESS->allocate_cost(SEGV);
+                    }
+                    else
+                    {
+                        // Page can be accessed, so it must be allocated
+                    }
+                }
+
                 break;
             }
         }
