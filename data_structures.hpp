@@ -24,19 +24,18 @@ const enum PROC_CYCLES {
 };
 
 // VALUES (Cant Store in ENUM as 410 occurs twice)
-// May not be necessry afte rall
-// const int int_readwrite = 1;
-// const int int_contextswitch = 130;
-// const int int_procexit = 1230;
-// const int int_maps = 350;
-// const int int_unmaps = 410;
-// const int int_ins = 3200;
-// const int int_outs = 2750;
-// const int int_fins = 2350;
-// const int int_fouts = 2800;
-// const int int_zeros = 150;
-// const int int_segv = 440;
-// const int int_segprot = 410;
+const int int_readwrite = 1;
+const int int_contextswitch = 130;
+const int int_procexit = 1230;
+const int int_maps = 350;
+const int int_unmaps = 410;
+const int int_ins = 3200;
+const int int_outs = 2750;
+const int int_fins = 2350;
+const int int_fouts = 2800;
+const int int_zeros = 150;
+const int int_segv = 440;
+const int int_segprot = 410;
 
 // Max number of page table entries
 const unsigned int NUM_PTE = 64;
@@ -262,11 +261,26 @@ public:
         return pid;
     }
 
+    unsigned long long calc_total_cost()
+    {
+        total_cost += unmaps * int_unmaps;
+        total_cost += maps * int_maps;
+        total_cost += ins * int_ins;
+        total_cost += outs * int_outs;
+        total_cost += fins * int_fins;
+        total_cost += fouts * int_fouts;
+        total_cost += zeros * int_zeros;
+        total_cost += segv * int_segv;
+        total_cost += segprot * int_segprot;
+        return total_cost;
+    }
+
 private:
     unsigned int pid;
     unsigned int num_vmas;
     vma_range *vma_arr;
     pte_t page_table_arr[NUM_PTE];
+    unsigned long long total_cost;
     unsigned long unmaps;
     unsigned long maps;
     unsigned long ins;

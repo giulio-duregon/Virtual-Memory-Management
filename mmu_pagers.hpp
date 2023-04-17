@@ -212,13 +212,13 @@ public:
         switch (cost_type)
         {
         case READ_WRITE:
-            inst_count += READ_WRITE;
+            inst_count += 1;
             break;
         case CONTEXT_SWITCH:
-            ctx_switches += CONTEXT_SWITCH;
+            ctx_switches += 1;
             break;
         case PROC_EXIT:
-            process_exits += PROC_EXIT;
+            process_exits += 1;
             break;
         }
     }
@@ -239,8 +239,12 @@ public:
     {
         // Incrementally add to avoid overflow
         cost += inst_count;
-        cost += ctx_switches;
-        cost += process_exits;
+        cost += ctx_switches * CONTEXT_SWITCH;
+        cost += process_exits * PROC_EXIT;
+        for (int i = 0; i < num_processes; i++)
+        {
+            cost += process_arr[i].calc_total_cost();
+        }
 
         // Print out total cost information
         printf("TOTALCOST %lu %lu %lu %llu %lu\n",
@@ -274,7 +278,6 @@ public:
         {
             printf("PT[%d]", i);
             process_arr[i].print_process_table();
-            printf("\n");
         }
     }
 
