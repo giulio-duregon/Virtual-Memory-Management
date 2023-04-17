@@ -227,7 +227,7 @@ public:
     }
     pte_t *get_vpage(int vpage_num)
     {
-        if (!page_table_arr[vpage_num].PRESENT)
+        if (!page_table_arr[vpage_num].EXISTS)
         {
             pte_init(vpage_num);
         }

@@ -124,25 +124,45 @@ public:
     // pte_t struct -> frame_t struct
     void map_frame(Process *process, int vpage_num, frame_t *free_frame)
     {
+        // Allocate cost of MAPS + grab vpage
         process->allocate_cost(MAPS);
         pte_t *vpage = process->get_vpage(vpage_num);
+
         // Update VMA page mapping
         vpage->frame_number = free_frame->frame_number;
 
-        // TODO: Some other logic about modified / referenced bits
+        // Update present / referenced / exist bits
         vpage->PRESENT = 1;
         vpage->REFERENCED = 1;
+        vpage->EXISTS = 1;
 
         // See if page has never been accessed, and is not file mapped
-        if ((vpage->NOT_FIRST_ACCESS == 0) && (vpage->FILEMAPPED == 0))
+        if (vpage->PAGEDOUT)
         {
-            if (O)
+            // We don't have to think about first-load logic
+            // Just bill / print the correct amount based on File Mapping
+            if (vpage->FILEMAPPED)
             {
-                printf(" ZERO\n");
+                process->allocate_cost(FINS);
+                printf(" FIN\n");
             }
-            // An operating system must zero pages on first access (unless filemapped) to guarantee consistent behavior
-            process->allocate_cost(ZEROS);
-            vpage->NOT_FIRST_ACCESS = 1;
+            else
+            {
+                process->allocate_cost(INS);
+                printf(" IN\n");
+            }
+        }
+        else
+        {
+            if (!(vpage->FILEMAPPED))
+            {
+                if (O)
+                {
+                    printf(" ZERO\n");
+                }
+                // An operating system must zero pages on first access (unless filemapped) to guarantee consistent behavior
+                process->allocate_cost(ZEROS);
+            }
         }
         // Update physical frame to reverse map to page
         FRAME_TABLE[free_frame->frame_number].process_id = process->get_pid();
@@ -171,9 +191,6 @@ public:
             printf(" UNMAP %d:%d\n", pid, vpage);
         }
 
-        // TODO: Implement logic to handle page getting unmapped from frame
-        //  i.e. what to do if modified, referenced etc.
-
         // If modified it must be written out
         if (page->MODIFIED)
         {
@@ -190,7 +207,6 @@ public:
 
             // Reset modified bit
             page->MODIFIED = 0;
-
             // Set PAGEDOUT bit
             page->PAGEDOUT = 1;
         }

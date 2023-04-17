@@ -38,3 +38,4 @@ runit*
 *.app
 .DS_Store
 temp.cpp
+mine_temp
