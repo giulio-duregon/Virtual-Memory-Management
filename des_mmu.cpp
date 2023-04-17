@@ -216,9 +216,10 @@ int main(int argc, char **argv)
             sscanf(line.c_str(), "%s %d", &operation, &vpage);
 
             // If O option print instruction details
-            if (O)
+            if (O && (operation == 'c' || operation == 'w' || operation == 'e' || operation == 'r'))
             {
                 printf("%d: ==> %s %d\n", inst_count, &operation, vpage);
+                inst_count++;
             }
 
             switch (operation)
@@ -274,7 +275,6 @@ int main(int argc, char **argv)
                 CURRENT_PROCESS->set_write(vpage);
                 break;
             }
-            inst_count++;
         }
     }
     input_file.close();
