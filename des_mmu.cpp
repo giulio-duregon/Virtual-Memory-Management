@@ -58,6 +58,7 @@ void read_write_logic(Pager *THE_PAGER, Process *CURRENT_PROCESS, const int vpag
         }
     }
 }
+
 int main(int argc, char **argv)
 {
     /* ################### Config Instructions ############################################
@@ -272,6 +273,32 @@ int main(int argc, char **argv)
             case 'e':
                 // Add Process-Exit cycle cost to pager for accounting
                 THE_PAGER->allocate_cost(PROC_EXIT);
+
+                // Traverse active process page table, each valid entry unmap the page
+                for (int i = 0; i < NUM_PTE; i++)
+                {
+                    pte_t *temp = CURRENT_PROCESS->get_vpage(i);
+                    if (temp->PRESENT)
+                    {
+                        // TODO: May have to add some printf's here
+                        // Unmap frame
+                        unsigned int frame_num = temp->frame_number;
+                        THE_PAGER->clear_mapping(frame_num);
+
+                        // Add frame to free list
+                        THE_PAGER->add_frame_to_free_list(frame_num);
+
+                        // Update accounting per instructions:
+                        /*On process exit (instruction), you have to traverse the active process’s pagetable starting from
+                         0..63 and for each valid entry UNMAP the page and FOUT modified filemapped pages.
+                        Note that dirty non-fmapped (anonymous) pages are not written back (OUT) as the process exits.*/
+                        CURRENT_PROCESS->allocate_cost(UNMAPS);
+                        if (temp->FILEMAPPED && temp->MODIFIED)
+                        {
+                            CURRENT_PROCESS->allocate_cost(FOUTS);
+                        }
+                    }
+                }
                 break;
             case 'r':
                 read_write_logic(THE_PAGER, CURRENT_PROCESS, vpage);

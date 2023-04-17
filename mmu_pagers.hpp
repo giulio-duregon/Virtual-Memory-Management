@@ -124,6 +124,7 @@ public:
     // pte_t struct -> frame_t struct
     void map_frame(Process *process, int vpage_num, frame_t *free_frame)
     {
+        process->allocate_cost(MAPS);
         pte_t *vpage = process->get_vpage(vpage_num);
         // Update VMA page mapping
         vpage->frame_number = free_frame->frame_number;
@@ -158,6 +159,7 @@ public:
     {
         // Get correct pointer to victim process + frame to be unmapped
         Process *process = &process_arr[pid];
+        process->allocate_cost(UNMAPS);
         pte_t *page = process->get_vpage(old_page_num);
 
         // Retrieve Physical Frame Number
@@ -219,6 +221,17 @@ public:
             process_exits += PROC_EXIT;
             break;
         }
+    }
+
+    void add_frame_to_free_list(frame_t *free_frame)
+    {
+        free_list.push_back(free_frame);
+    }
+
+    void add_frame_to_free_list(int frame_num)
+    {
+        frame_t *temp = &FRAME_TABLE[frame_num];
+        free_list.push_back(temp);
     }
 
     // Output as described in the docs
