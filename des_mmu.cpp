@@ -145,9 +145,9 @@ int main(int argc, char **argv)
     inputfile_name = argv[optind];
     randfile_name = argv[optind + 1];
 
-    // To delete
-    printf("Num Frames: %d, Sched Type: %s, Input Filename: %s, Rfile Name: %s\n", NUM_FRAMES, char_sched_type, inputfile_name.c_str(), randfile_name.c_str());
-    printf("Optional Args: %s: A %d Y %d X %d S %d F %d P %d O %d \n", optional_args, a, y, x, S, F, P, O);
+    // TODO: To delete
+    // printf("Num Frames: %d, Sched Type: %s, Input Filename: %s, Rfile Name: %s\n", NUM_FRAMES, char_sched_type, inputfile_name.c_str(), randfile_name.c_str());
+    // printf("Optional Args: %s: A %d Y %d X %d S %d F %d P %d O %d \n", optional_args, a, y, x, S, F, P, O);
 
     // Process rfile
     int r_array_size;
@@ -169,7 +169,9 @@ int main(int argc, char **argv)
     // Initialize Pager Algorithm from Input
     PAGER_TYPES pager_type = parse_pager_type_from_input(char_sched_type);
     THE_PAGER = build_pager(pager_type, NUM_FRAMES, O, a);
-    printf("Pager Algo (Enum): %d Pager Algo (Name): %s\n", THE_PAGER->ptype, GET_PAGER_NAME_FROM_ENUM(THE_PAGER->ptype));
+
+    // TODO: DELETE
+    // printf("Pager Algo (Enum): %d Pager Algo (Name): %s\n", THE_PAGER->ptype, GET_PAGER_NAME_FROM_ENUM(THE_PAGER->ptype));
 
     // Helper Variables for Process / VMA Construction
     std::ifstream input_file(inputfile_name);
@@ -225,11 +227,6 @@ int main(int argc, char **argv)
 
     // Add process arr to pointer for easier accounting
     THE_PAGER->init_process_metadata(num_processes, process_arr);
-
-    // TODO: Delete Later used to check input is read correctly
-    printf("Num Processes: %d\n", num_processes);
-    process_arr[0].print_process_table();
-    process_arr[0].print_vma_ranges();
 
     // ####################################
     // ######## Simulation Begins #########

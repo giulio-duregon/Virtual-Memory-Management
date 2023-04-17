@@ -138,7 +138,7 @@ public:
         {
             if (O)
             {
-                printf("ZERO\n");
+                printf(" ZERO\n");
             }
             // An operating system must zero pages on first access (unless filemapped) to guarantee consistent behavior
             process->allocate_cost(ZEROS);
@@ -151,7 +151,7 @@ public:
         // If output option, display filenumber that is mapped
         if (O)
         {
-            printf("MAP %d\n", free_frame->frame_number);
+            printf(" MAP %d\n", free_frame->frame_number);
         }
     };
 
@@ -168,7 +168,7 @@ public:
 
         if (O)
         {
-            printf("UNMAP %d:%d\n", pid, vpage);
+            printf(" UNMAP %d:%d\n", pid, vpage);
         }
 
         // TODO: Implement logic to handle page getting unmapped from frame
@@ -180,10 +180,12 @@ public:
             if (page->FILEMAPPED)
             {
                 process->allocate_cost(FOUTS);
+                printf(" FOUT\n");
             }
             else
             {
                 process->allocate_cost(OUTS);
+                printf(" OUT\n");
             }
 
             // Reset modified bit
@@ -317,7 +319,7 @@ public:
         // If option selected, output victim frame
         if (a)
         {
-            printf("ASELECT: %d\n", CLOCK_HAND);
+            printf("ASELECT %d\n", CLOCK_HAND);
         }
         increment_clock_hand();
         return free_frame;

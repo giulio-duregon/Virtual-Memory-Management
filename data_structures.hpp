@@ -213,8 +213,24 @@ public:
         }
     }
 
+    void pte_init(int vpage_num)
+    {
+        for (int i = 0; i < num_vmas; i++)
+        {
+            vma_range temp = vma_arr[i];
+            if (vpage_num >= temp.START && vpage_num <= temp.END)
+            {
+                page_table_arr[vpage_num].WRITE_PROTECT = temp.WRITE_PROTECT;
+                page_table_arr[vpage_num].FILEMAPPED = temp.FILEMAPPED;
+            }
+        }
+    }
     pte_t *get_vpage(int vpage_num)
     {
+        if (!page_table_arr[vpage_num].PRESENT)
+        {
+            pte_init(vpage_num);
+        }
         return &page_table_arr[vpage_num];
     }
 
