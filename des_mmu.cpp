@@ -202,6 +202,7 @@ int main(int argc, char **argv)
     char operation;
     int vpage;
     int current_process_num;
+    int inst_count = 0;
     Process *CURRENT_PROCESS;
     input_file.open(inputfile_name);
 
@@ -213,6 +214,12 @@ int main(int argc, char **argv)
         {
             // Parse Operation + Vpage from input
             sscanf(line.c_str(), "%s %d", &operation, &vpage);
+
+            // If O option print instruction details
+            if (O)
+            {
+                printf("%d: ==> %s %d\n", inst_count, &operation, vpage);
+            }
 
             switch (operation)
             {
@@ -267,6 +274,7 @@ int main(int argc, char **argv)
                 CURRENT_PROCESS->set_write(vpage);
                 break;
             }
+            inst_count++;
         }
     }
     input_file.close();

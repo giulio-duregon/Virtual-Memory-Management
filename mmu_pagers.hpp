@@ -126,15 +126,40 @@ public:
         FRAME_TABLE[frame_number].VMA_page_number = vpage_number;
     };
 
-    void unmap_frame(pte_t &page)
+    void unmap_frame(Process *process, pte_t &page, bool O)
     {
+        unsigned int pid = process->get_pid();
         // Retrieve Physical Frame Number
-        int frame_num = page.PAGEDOUT;
+        int frame_num = page.frame_number;
+        int vpage = FRAME_TABLE[frame_num].VMA_page_number;
+
+        if (O)
+        {
+            printf("UNMAP %d:%d", pid, vpage);
+        }
 
         // TODO: Implement logic to handle page getting unmapped from frame
         //  i.e. what to do if modified, referenced etc.
 
-        // Clear Physical Frame
+        // If modified it must be written out
+        if (page.MODIFIED)
+        {
+            if (page.FILEMAPPED)
+            {
+                process->allocate_cost(FOUTS);
+            }
+            else
+            {
+                process->allocate_cost(OUTS);
+            }
+
+            // Reset modified bit
+            page.MODIFIED = 0;
+
+            // Set PAGEDOUT bit
+            page.PAGEDOUT = 1;
+        }
+        // Clear Physical Frame mapping
         clear_mapping(frame_num);
 
         page.PRESENT = 0;
@@ -144,12 +169,9 @@ public:
     // To a process id / virtual frame number
     void clear_mapping(int frame_number)
     {
-        // Retrieve Frame
-        frame_t frame = FRAME_TABLE[frame_number];
-
         // Reset frame Numbers
-        frame.process_id = -1;
-        frame.VMA_page_number = -1;
+        FRAME_TABLE[frame_number].process_id = -1;
+        FRAME_TABLE[frame_number].VMA_page_number = -1;
     }
 
     void allocate_cost(PAGER_CYCLES cost_type)
