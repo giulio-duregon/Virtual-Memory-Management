@@ -3,6 +3,30 @@
 #ifndef DATA_STRUCTURES
 #define DATA_STRUCTURES
 
+/* You have to compute the overall execution time in cycles,
+where the cost of operations (in terms of cycles)
+are as follows: read/write (load/store) instructions count as 1,
+context_switches instructions=130, process exits instructions=1230.
+In addition if the following operations counts as follows:
+maps=350, unmaps=410, ins=3200, outs=2750, fins=2350, fouts=2800,
+zeros=150, segv=440, segprot=410 */
+
+enum CYCLES
+{
+    READ_WRITE = 1,
+    CONTEXT_SWITCH = 130,
+    PROC_EXIT = 1230,
+    MAPS = 350,
+    UNMAPS = 410,
+    INS = 3200,
+    OUTS = 2750,
+    FINS = 2350,
+    FOUTS = 2800,
+    ZEROS = 150,
+    SEGV = 440,
+    SEGPROT = 410
+};
+
 // Max number of page table entries
 const unsigned int NUM_PTE = 64;
 
