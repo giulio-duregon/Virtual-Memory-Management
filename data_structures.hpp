@@ -11,21 +11,34 @@ In addition if the following operations counts as follows:
 maps=350, unmaps=410, ins=3200, outs=2750, fins=2350, fouts=2800,
 zeros=150, segv=440, segprot=410 */
 
-enum CYCLES
-{
-    READ_WRITE = 1,
-    CONTEXT_SWITCH = 130,
-    PROC_EXIT = 1230,
-    MAPS = 350,
-    UNMAPS = 410,
-    INS = 3200,
-    OUTS = 2750,
-    FINS = 2350,
-    FOUTS = 2800,
-    ZEROS = 150,
-    SEGV = 440,
-    SEGPROT = 410
+const enum CYCLES {
+    READ_WRITE,
+    CONTEXT_SWITCH,
+    PROC_EXIT,
+    MAPS,
+    UNMAPS,
+    INS,
+    OUTS,
+    FINS,
+    FOUTS,
+    ZEROS,
+    SEGV,
+    SEGPROT
 };
+
+// VALUES
+const int int_readwrite = 1;
+const int int_contextswitch = 130;
+const int int_procexit = 1230;
+const int int_maps = 350;
+const int int_unmaps = 410;
+const int int_ins = 3200;
+const int int_outs = 2750;
+const int int_fins = 2350;
+const int int_fouts = 2800;
+const int int_zeros = 150;
+const int int_segv = 440;
+const int int_segprot = 410;
 
 // Max number of page table entries
 const unsigned int NUM_PTE = 64;
@@ -135,11 +148,45 @@ public:
         }
     }
 
+    void allocate_cost(CYCLES cost_type)
+    {
+        switch (cost_type)
+        {
+        case UNMAPS:
+            unmaps += int_unmaps;
+        case MAPS:
+            maps += int_maps;
+        case INS:
+            ins += int_ins;
+        case OUTS:
+            outs += int_outs;
+        case FINS:
+            fins += int_fins;
+        case FOUTS:
+            fouts += int_fouts;
+        case ZEROS:
+            zeros += int_zeros;
+        case SEGV:
+            segv += int_segv;
+        case SEGPROT:
+            segprot += int_segprot;
+        }
+    }
+
 private:
     unsigned int pid;
     unsigned int num_vmas;
     vma_range *vma_arr;
     pte_t page_table_arr[NUM_PTE];
+    unsigned long unmaps;
+    unsigned long maps;
+    unsigned long ins;
+    unsigned long outs;
+    unsigned long fins;
+    unsigned long fouts;
+    unsigned long zeros;
+    unsigned long segv;
+    unsigned long segprot;
 };
 
 int Process::counter = 0;

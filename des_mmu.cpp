@@ -192,9 +192,40 @@ int main(int argc, char **argv)
     printf("Num Processes: %d\n", num_processes);
     process_arr[0].print_process_table();
     process_arr[0].print_vma_ranges();
+
     // ####################################
     // ######## Simulation Begins #########
     // ###################################
+
+    // Helper variables for simulation
+    char operation;
+    int vpage;
+    int current_process_num;
+    Process *current_process;
+    // Read instructions
+    while (getline(input_file, line))
+    {
+        // Ignore line comments
+        if (line.c_str()[0] != '#')
+        {
+            // Parse Operation + Vpage from input
+            sscanf(line.c_str(), "%s %d", &operation, &vpage);
+
+            switch (operation)
+            {
+            case 'c':
+                current_process = &process_arr[current_process_num];
+                
+                break;
+            case 'e':
+                break;
+            case 'r':
+                break;
+            case 'w':
+                break;
+            }
+        }
+    }
 
     return 0;
 }
