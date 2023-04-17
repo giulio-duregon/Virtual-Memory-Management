@@ -151,22 +151,31 @@ public:
         {
         case UNMAPS:
             unmaps += int_unmaps;
+            break;
         case MAPS:
             maps += int_maps;
+            break;
         case INS:
             ins += int_ins;
+            break;
         case OUTS:
             outs += int_outs;
+            break;
         case FINS:
             fins += int_fins;
+            break;
         case FOUTS:
             fouts += int_fouts;
+            break;
         case ZEROS:
             zeros += int_zeros;
+            break;
         case SEGV:
             segv += int_segv;
+            break;
         case SEGPROT:
             segprot += int_segprot;
+            break;
         }
     }
 

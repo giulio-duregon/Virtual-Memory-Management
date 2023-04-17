@@ -131,27 +131,45 @@ public:
         frame.process_id = -1;
         frame.VMA_frame_number = -1;
     }
+
     void allocate_cost(PAGER_CYCLES cost_type)
     {
         switch (cost_type)
         {
         case READ_WRITE:
             inst_count += READ_WRITE;
+            break;
         case CONTEXT_SWITCH:
             ctx_switches += CONTEXT_SWITCH;
+            break;
         case PROC_EXIT:
             process_exits += PROC_EXIT;
+            break;
         }
     }
+
+    // Output as described in the docs
+    void print_total_cost()
+    {
+        // Incrementally add to avoid overflow
+        cost += inst_count;
+        cost += ctx_switches;
+        cost += process_exits;
+
+        // Print out total cost information
+        printf("TOTALCOST %lu %lu %lu %llu %lu\n",
+               inst_count, ctx_switches, process_exits, cost, sizeof(pte_t));
+    }
+
     PAGER_TYPES ptype;
 
 protected:
     frame_t *FRAME_TABLE;
     std::deque<int> free_list;
-    unsigned long long cost;
-    unsigned long inst_count;
-    unsigned long ctx_switches;
-    unsigned long process_exits;
+    unsigned long long cost = 0;
+    unsigned long inst_count = 0;
+    unsigned long ctx_switches = 0;
+    unsigned long process_exits = 0;
 };
 
 // FIFO Pager Implementation

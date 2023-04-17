@@ -187,6 +187,7 @@ int main(int argc, char **argv)
             }
         }
     }
+    input_file.close();
 
     // TODO: Delete Later used to check input is read correctly
     printf("Num Processes: %d\n", num_processes);
@@ -202,6 +203,7 @@ int main(int argc, char **argv)
     int vpage;
     int current_process_num;
     Process *current_process;
+    input_file.open(inputfile_name);
     // Read instructions
     while (getline(input_file, line))
     {
@@ -214,19 +216,30 @@ int main(int argc, char **argv)
             switch (operation)
             {
             case 'c':
+                // Update current process number
+                current_process_num = vpage;
+                // Add context-switching cycle cost to pager for accounting
                 THE_PAGER->allocate_cost(CONTEXT_SWITCH);
+                // Update the pointer to current Process
                 current_process = &process_arr[current_process_num];
-
                 break;
+
             case 'e':
+                // Add Process-Exit cycle cost to pager for accounting
+                THE_PAGER->allocate_cost(PROC_EXIT);
                 break;
             case 'r':
+                // Add Read/Write cycle cost to pager for accounting
+                THE_PAGER->allocate_cost(READ_WRITE);
                 break;
             case 'w':
+                // Add Read/Write cycle cost to pager for accounting
+                THE_PAGER->allocate_cost(READ_WRITE);
                 break;
             }
         }
     }
-
+    input_file.close();
+    THE_PAGER->print_total_cost();
     return 0;
 }
