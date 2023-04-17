@@ -11,7 +11,7 @@
             "program": "${fileDirname}/${fileBasenameNoExtension}",
             "args": [
                 "-o",
-                "OPFS",
+                "aOPFS",
                 "-a",
                 "f",
                 "in1",
