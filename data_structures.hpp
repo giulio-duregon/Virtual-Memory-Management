@@ -11,10 +11,7 @@ In addition if the following operations counts as follows:
 maps=350, unmaps=410, ins=3200, outs=2750, fins=2350, fouts=2800,
 zeros=150, segv=440, segprot=410 */
 
-const enum CYCLES {
-    READ_WRITE,
-    CONTEXT_SWITCH,
-    PROC_EXIT,
+const enum PROC_CYCLES {
     MAPS,
     UNMAPS,
     INS,
@@ -148,7 +145,7 @@ public:
         }
     }
 
-    void allocate_cost(CYCLES cost_type)
+    void allocate_cost(PROC_CYCLES cost_type)
     {
         switch (cost_type)
         {

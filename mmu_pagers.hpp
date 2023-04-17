@@ -5,6 +5,17 @@
 #ifndef MMU_PAGERS
 #define MMU_PAGERS
 
+/* You have to compute the overall execution time in cycles,
+where the cost of operations (in terms of cycles)
+are as follows: read/write (load/store) instructions count as 1,
+context_switches instructions=130, process exits instructions=1230.*/
+
+const enum PAGER_CYCLES {
+    READ_WRITE = 1,
+    CONTEXT_SWITCH = 130,
+    PROC_EXIT = 1230,
+};
+
 // Define Pager Algo Types via Enum
 enum PAGER_TYPES
 {
@@ -120,11 +131,27 @@ public:
         frame.process_id = -1;
         frame.VMA_frame_number = -1;
     }
+    void allocate_cost(PAGER_CYCLES cost_type)
+    {
+        switch (cost_type)
+        {
+        case READ_WRITE:
+            inst_count += READ_WRITE;
+        case CONTEXT_SWITCH:
+            ctx_switches += CONTEXT_SWITCH;
+        case PROC_EXIT:
+            process_exits += PROC_EXIT;
+        }
+    }
     PAGER_TYPES ptype;
 
 protected:
     frame_t *FRAME_TABLE;
     std::deque<int> free_list;
+    unsigned long long cost;
+    unsigned long inst_count;
+    unsigned long ctx_switches;
+    unsigned long process_exits;
 };
 
 // FIFO Pager Implementation

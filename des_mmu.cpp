@@ -214,8 +214,9 @@ int main(int argc, char **argv)
             switch (operation)
             {
             case 'c':
+                THE_PAGER->allocate_cost(CONTEXT_SWITCH);
                 current_process = &process_arr[current_process_num];
-                
+
                 break;
             case 'e':
                 break;
