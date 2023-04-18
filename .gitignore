@@ -4,6 +4,7 @@ gradeit*
 temp
 refout*
 runit*
+output_dir
 # Prerequisites
 *.d
 
@@ -39,3 +40,4 @@ runit*
 .DS_Store
 temp.cpp
 mine_temp
+helper.sh
