@@ -249,9 +249,11 @@ public:
             inst_count++;
             break;
         case CONTEXT_SWITCH:
+            inst_count++;
             ctx_switches++;
             break;
         case PROC_EXIT:
+            inst_count++;
             process_exits++;
             break;
         }
@@ -272,16 +274,13 @@ public:
     void print_total_cost()
     {
         // Incrementally add to avoid overflow
-        cost += inst_count;
+        cost += inst_count - process_exits - ctx_switches;
         cost += ctx_switches * CONTEXT_SWITCH;
         cost += process_exits * PROC_EXIT;
         for (int i = 0; i < num_processes; i++)
         {
             cost += process_arr[i].calc_total_cost();
         }
-
-        // Guess that context switches / proc exits count as instructions
-        inst_count += ctx_switches + process_exits;
 
         // Print out total cost information
         printf("TOTALCOST %lu %lu %lu %llu %lu\n",
@@ -644,7 +643,7 @@ public:
     bool check_reset_ref_bit()
     {
         // First instruction is instruction 0, makin this an annoying off-by 1 error
-        if ((inst_count - last_sweep_inst_count) >= (RESET_REFBIT_THRESHOLD - 1))
+        if ((inst_count - last_sweep_inst_count) >= (RESET_REFBIT_THRESHOLD))
         {
             last_sweep_inst_count = inst_count;
             return true;
