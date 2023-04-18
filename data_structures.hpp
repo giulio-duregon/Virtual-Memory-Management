@@ -86,7 +86,7 @@ typedef struct frame_t
 
 class Process
 {
-    static int counter;
+    static unsigned int counter;
 
 public:
     Process()
@@ -115,7 +115,7 @@ public:
     // Helper function to check if a VMA exists on pagefault
     bool vma_exists(const unsigned int vma_query)
     {
-        for (int i = 0; i < num_vmas; i++)
+        for (unsigned int i = 0; i < num_vmas; i++)
         {
             vma_range temp = vma_arr[i];
             if (vma_query >= temp.START && vma_query <= temp.END)
@@ -126,9 +126,13 @@ public:
         return false;
     }
 
-    unsigned int check_present_valid(int vpage)
+    bool check_present_valid(int vpage)
     {
-        return page_table_arr[vpage].PRESENT;
+        if (page_table_arr[vpage].PRESENT)
+        {
+            return true;
+        }
+        return false;
     }
 
     bool vpage_can_be_accessed(int vpage)
@@ -150,15 +154,15 @@ public:
 
     void set_frame_num(int vpage, int framenum)
     {
-        page_table_arr[vpage].frame_number = framenum;
+        page_table_arr[vpage].frame_number = (unsigned int)framenum;
     }
 
-    void set_write(unsigned int vpage)
+    void set_write(int vpage)
     {
         page_table_arr[vpage].MODIFIED = 1;
     }
 
-    unsigned int write_protect_enabled(unsigned int vpage)
+    unsigned int write_protect_enabled(int vpage)
     {
         return page_table_arr[vpage].WRITE_PROTECT;
     }
@@ -302,7 +306,7 @@ public:
 
 private:
     unsigned int pid = 0;
-    unsigned int num_vmas = 0;
+    int num_vmas = 0;
     vma_range *vma_arr;
     pte_t page_table_arr[NUM_PTE];
     unsigned long long total_cost = 0;
@@ -317,6 +321,6 @@ private:
     unsigned long segprot = 0;
 };
 
-int Process::counter = 0;
+unsigned int Process::counter = 0;
 
 #endif
