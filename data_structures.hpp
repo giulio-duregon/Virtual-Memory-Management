@@ -48,7 +48,7 @@ typedef struct vma_range
     unsigned int END : 7;
     unsigned int WRITE_PROTECT : 1;
     unsigned int FILEMAPPED : 1; // File mapped Flag
-} vma_range;
+};
 
 // VMA Page Bitfield structure -> Contains Protection Flags metadata and frame_number
 typedef struct pte_t
@@ -69,7 +69,7 @@ typedef struct pte_t
 
     // Page number bits (Supports 128 frames as maximum)
     unsigned int frame_number : 7;
-} pte_t;
+};
 
 // Frame Table Struct - Stores Data for Reverse Mapping frame -> page
 typedef struct frame_t
