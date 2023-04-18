@@ -231,13 +231,13 @@ public:
         switch (cost_type)
         {
         case READ_WRITE:
-            inst_count += 1;
+            inst_count++;
             break;
         case CONTEXT_SWITCH:
-            ctx_switches += 1;
+            ctx_switches++;
             break;
         case PROC_EXIT:
-            process_exits += 1;
+            process_exits++;
             break;
         }
     }

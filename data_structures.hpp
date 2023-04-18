@@ -237,31 +237,31 @@ public:
         switch (cost_type)
         {
         case UNMAPS:
-            unmaps += 1;
+            unmaps++;
             break;
         case MAPS:
-            maps += 1;
+            maps++;
             break;
         case INS:
-            ins += 1;
+            ins++;
             break;
         case OUTS:
-            outs += 1;
+            outs++;
             break;
         case FINS:
-            fins += 1;
+            fins++;
             break;
         case FOUTS:
-            fouts += 1;
+            fouts++;
             break;
         case ZEROS:
-            zeros += 1;
+            zeros++;
             break;
         case SEGV:
-            segv += 1;
+            segv++;
             break;
         case SEGPROT:
-            segprot += 1;
+            segprot++;
             break;
         }
     }
