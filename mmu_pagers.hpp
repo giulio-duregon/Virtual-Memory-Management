@@ -506,7 +506,7 @@ public:
             {
                 break;
             }
-            
+
             // Select candidate victim frame
             potential_victim_frame = &FRAME_TABLE[CLOCK_HAND];
 
@@ -709,7 +709,7 @@ Pager *build_pager(PAGER_TYPES pager_type, int NUM_FRAMES, int array_size, int *
     case Clock:
         return (Pager *)new Clock_Pager(NUM_FRAMES, O, a);
     case ESC_NRU:
-        throw new NotImplemented;
+        return (Pager *)new ESC_NRU_Pager(NUM_FRAMES, O, a);
     case Aging:
         throw new NotImplemented;
     case Working_Set:
