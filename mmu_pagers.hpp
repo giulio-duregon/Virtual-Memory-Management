@@ -397,20 +397,11 @@ private:
         {
             offset = 0;
         }
+        int victim_frame = (randvals[offset] % NUM_FRAMES);
         offset++;
         // Grab random value
-        return (randvals[offset] % NUM_FRAMES);
+        return victim_frame;
     }
-
-    // void update_offset()
-    // {
-    //     offset++;
-    //     // Increment offset and if we pass the array size loop back around
-    //     if (offset >= array_size)
-    //     {
-    //         offset = 0;
-    //     }
-    // }
 };
 
 // Helper function to build pager based on CLI input
