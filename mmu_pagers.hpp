@@ -313,8 +313,8 @@ public:
     }
 
 protected:
-    int NUM_FRAMES;
-    bool O;
+    int NUM_FRAMES = 0;
+    bool O = false;
     frame_t *FRAME_TABLE;
     std::deque<frame_t *> free_list;
     unsigned long long cost = 0;

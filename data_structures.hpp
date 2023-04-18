@@ -290,20 +290,20 @@ public:
     }
 
 private:
-    unsigned int pid;
-    unsigned int num_vmas;
+    unsigned int pid = 0;
+    unsigned int num_vmas = 0;
     vma_range *vma_arr;
     pte_t page_table_arr[NUM_PTE];
-    unsigned long long total_cost;
-    unsigned long unmaps;
-    unsigned long maps;
-    unsigned long ins;
-    unsigned long outs;
-    unsigned long fins;
-    unsigned long fouts;
-    unsigned long zeros;
-    unsigned long segv;
-    unsigned long segprot;
+    unsigned long long total_cost = 0;
+    unsigned long unmaps = 0;
+    unsigned long maps = 0;
+    unsigned long ins = 0;
+    unsigned long outs = 0;
+    unsigned long fins = 0;
+    unsigned long fouts = 0;
+    unsigned long zeros = 0;
+    unsigned long segv = 0;
+    unsigned long segprot = 0;
 };
 
 int Process::counter = 0;
