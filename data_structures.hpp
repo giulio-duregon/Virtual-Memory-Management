@@ -126,7 +126,7 @@ public:
         return false;
     }
 
-    bool check_present_valid(int vpage)
+    unsigned int check_present_valid(int vpage)
     {
         return page_table_arr[vpage].PRESENT;
     }
