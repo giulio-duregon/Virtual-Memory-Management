@@ -81,7 +81,7 @@ int main(int argc, char **argv)
     bool O, P, F, S, x, y, a;
     const char *optional_args;
     int c;
-    int NUM_FRAMES;
+    unsigned int NUM_FRAMES;
     char *char_sched_type = nullptr;
     std::string inputfile_name;
     std::string randfile_name;

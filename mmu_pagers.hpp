@@ -61,7 +61,7 @@ char *GET_PAGER_NAME_FROM_ENUM(int enum_code)
         (char *)"Aging",
         (char *)"Working_Set"};
     return enum_name[enum_code];
-};
+}
 
 // Custom Exception
 class NotImplemented : public std::logic_error
@@ -74,7 +74,7 @@ public:
 class Pager
 {
 public:
-    Pager(int NUM_FRAMES_, PAGER_TYPES ptype_, bool O_)
+    Pager(unsigned int NUM_FRAMES_, PAGER_TYPES ptype_, bool O_)
     {
         NUM_FRAMES = NUM_FRAMES_;
         ptype = ptype_;
@@ -313,7 +313,7 @@ public:
     }
 
 protected:
-    int NUM_FRAMES = 0;
+    unsigned int NUM_FRAMES = 0;
     bool O = false;
     frame_t *FRAME_TABLE;
     std::deque<frame_t *> free_list;
