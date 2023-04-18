@@ -92,28 +92,31 @@ public:
     Process()
     {
         pid = counter++;
-        set_all_pte_to_zero();
+        init_set_all_pte_to_zero();
     }
 
-    void set_all_pte_to_zero()
+    void init_set_all_pte_to_zero()
     {
         // NECESSARY TO RUN CORRECTLY ON LINSERV
         for (unsigned int i = 0; i < NUM_PTE; i++)
         {
-            page_table_arr[i].UNUSED_BITS = 0;
-            page_table_arr[i].EXISTS = 0;
-            page_table_arr[i].PID = 0;
-            page_table_arr[i].NOT_FIRST_ACCESS = 0;
-
-            page_table_arr[i].PAGEDOUT = 0;
-            page_table_arr[i].PRESENT = 0;
-            page_table_arr[i].REFERENCED = 0;
-            page_table_arr[i].MODIFIED = 0;
-            page_table_arr[i].WRITE_PROTECT = 0;
-            page_table_arr[i].FILEMAPPED = 0;
-
-            page_table_arr[i].frame_number = 0;
+            set_all_to_zero(&page_table_arr[i]);
         }
+    }
+
+    void set_all_to_zero(pte_t *page_entry)
+    {
+        page_entry->UNUSED_BITS = 0;
+        page_entry->EXISTS = 0;
+        page_entry->PID = 0;
+        page_entry->NOT_FIRST_ACCESS = 0;
+        page_entry->PAGEDOUT = 0;
+        page_entry->PRESENT = 0;
+        page_entry->REFERENCED = 0;
+        page_entry->MODIFIED = 0;
+        page_entry->WRITE_PROTECT = 0;
+        page_entry->FILEMAPPED = 0;
+        page_entry->frame_number = 0;
     }
     // Initializes array of VMA Ranges used for PTE creation on pagefault
     void init_vma(const int num_vmas_)
