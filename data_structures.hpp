@@ -11,7 +11,8 @@ In addition if the following operations counts as follows:
 maps=350, unmaps=410, ins=3200, outs=2750, fins=2350, fouts=2800,
 zeros=150, segv=440, segprot=410 */
 
-const enum PROC_CYCLES {
+enum PROC_CYCLES
+{
     MAPS,
     UNMAPS,
     INS,
@@ -41,7 +42,7 @@ const int int_segprot = 410;
 const unsigned int NUM_PTE = 64;
 
 // VMA Range For Lazy Page initialization
-typedef struct
+typedef struct vma_range
 {
     unsigned int START;
     unsigned int END;
@@ -50,7 +51,7 @@ typedef struct
 } vma_range;
 
 // VMA Page Bitfield structure -> Contains Protection Flags metadata and frame_number
-typedef struct
+typedef struct pte_t
 {
     // Custom Protection / Flag bits
     unsigned int UNUSED_BITS : 9;
@@ -71,7 +72,7 @@ typedef struct
 } pte_t;
 
 // Frame Table Struct - Stores Data for Reverse Mapping frame -> page
-typedef struct
+typedef struct frame_t
 {
     // Frame number
     unsigned int frame_number : 7;

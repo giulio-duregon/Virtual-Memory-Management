@@ -10,7 +10,8 @@ where the cost of operations (in terms of cycles)
 are as follows: read/write (load/store) instructions count as 1,
 context_switches instructions=130, process exits instructions=1230.*/
 
-const enum PAGER_CYCLES {
+enum PAGER_CYCLES
+{
     READ_WRITE = 1,
     CONTEXT_SWITCH = 130,
     PROC_EXIT = 1230,
