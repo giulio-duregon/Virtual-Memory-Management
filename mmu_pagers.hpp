@@ -491,9 +491,100 @@ public:
         bool reset_ref = check_reset_ref_bit();
         int start_hand_pos = CLOCK_HAND;
         int victim_class = 0;
-
         query_len = 0;
+        Process *temp;
         frame_t *free_frame = nullptr;
+        frame_t *potential_victim_frame = nullptr;
+
+        // if reset_ref we must scan all entries and reset all bits
+        // Search frame list -> O(n) where n = NUM_FRAMES
+        while (!free_frame)
+        {
+            // Check if we've already completed a whole frame scan
+            // Each frame only needs to be visited once
+            if (start_hand_pos == CLOCK_HAND && (query_len > 0))
+            {
+                break;
+            }
+            
+            // Select candidate victim frame
+            potential_victim_frame = &FRAME_TABLE[CLOCK_HAND];
+
+            // Grab relevant Process / Frame
+            temp = &process_arr[free_frame->process_id];
+            pte_t *page = temp->get_vpage(free_frame->VMA_page_number);
+
+            // First check for class 0
+            if (is_class_zero(page))
+            {
+                free_frame = potential_victim_frame;
+                victim_class = CLASS_0;
+            }
+
+            // Otherwise check what class
+            else
+            {
+                ESC_NRU_PAGE_CLASSES page_class = get_class(page);
+
+                // Update the class pointer if we haven't found one like it
+                switch (page_class)
+                {
+                case CLASS_1:
+                    if (!class_one_frame)
+                    {
+                        class_one_frame = potential_victim_frame;
+                    }
+                    break;
+                case CLASS_2:
+                    if (!class_two_frame)
+                    {
+                        class_two_frame = potential_victim_frame;
+                    }
+                    break;
+                case CLASS_3:
+                    if (!class_three_frame)
+                    {
+                        class_three_frame = potential_victim_frame;
+                    }
+                    break;
+                }
+            }
+
+            // Reset the referenced bit if that's whats required
+            if (reset_ref)
+            {
+                page->REFERENCED = 0;
+
+                // If we've found a free frame, finish resetting all bits
+                if (free_frame)
+                {
+                    finish_resetting_ref_bit(start_hand_pos);
+                }
+            }
+
+            // Increment hand and continue
+            increment_clock_hand();
+        }
+
+        // If we haven't found a Class 0 frame and we've visited all frames, select lowest class as vitcim
+        if (!free_frame)
+        {
+            if (class_one_frame)
+            {
+                free_frame = class_one_frame;
+                victim_class = CLASS_1;
+            }
+            else if (class_two_frame)
+            {
+                free_frame = class_two_frame;
+                victim_class = CLASS_2;
+            }
+            else
+            {
+                free_frame = class_three_frame;
+                victim_class = CLASS_3;
+            }
+        }
 
         // Output desired information
         if (a)
@@ -502,11 +593,41 @@ public:
         }
 
         // Increment hand before next invocation, clear class pointers
-        increment_clock_hand();
         clear_class_pointers();
 
         // Return free frame
         return free_frame;
+    }
+
+    // Helper function that continues sweep if class=0 is found early
+    // But frames still need to be traversed to reset all reference bits  to 0
+    void finish_resetting_ref_bit(int starting_pos)
+    {
+        // Helper vars
+        int starting_clock_hand = CLOCK_HAND;
+        frame_t *free_frame;
+        Process *temp;
+        pte_t *page;
+
+        // Increment the clock hand before and after for desired behvaior
+        increment_clock_hand();
+
+        while (CLOCK_HAND != starting_pos)
+        {
+            // Select candidate victim frame
+            free_frame = &FRAME_TABLE[CLOCK_HAND];
+
+            // Grab relevant Process / Frame
+            temp = &process_arr[free_frame->process_id];
+            page = temp->get_vpage(free_frame->VMA_page_number);
+
+            // Reset R bit
+            page->REFERENCED = 0;
+            increment_clock_hand();
+        }
+
+        // Reset clock hand to where it was as it was entered
+        CLOCK_HAND = starting_clock_hand;
     }
 
     // Helper function to see if enough instructions have passed
@@ -551,17 +672,17 @@ public:
     // Helper function to clear class pointers between invocations
     void clear_class_pointers()
     {
-        class_one = nullptr;
-        class_two = nullptr;
-        class_three = nullptr;
+        class_one_frame = nullptr;
+        class_two_frame = nullptr;
+        class_three_frame = nullptr;
     }
 
 private:
     const int RESET_REFBIT_THRESHOLD = 50;
     unsigned long last_sweep_inst_count = 0;
-    pte_t *class_one = nullptr;
-    pte_t *class_two = nullptr;
-    pte_t *class_three = nullptr;
+    frame_t *class_one_frame = nullptr;
+    frame_t *class_two_frame = nullptr;
+    frame_t *class_three_frame = nullptr;
     int CLOCK_HAND = 0;
     int query_len = 0;
 
