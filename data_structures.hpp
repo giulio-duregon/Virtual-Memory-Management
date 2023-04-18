@@ -92,8 +92,28 @@ public:
     Process()
     {
         pid = counter++;
+        set_all_pte_to_zero();
     }
 
+    void set_all_pte_to_zero()
+    {
+        for (unsigned int i = 0; i < NUM_PTE; i++)
+        {
+            page_table_arr[i].UNUSED_BITS = 0;
+            page_table_arr[i].EXISTS = 0;
+            page_table_arr[i].PID = 0;
+            page_table_arr[i].NOT_FIRST_ACCESS = 0;
+
+            page_table_arr[i].PAGEDOUT = 0;
+            page_table_arr[i].PRESENT = 0;
+            page_table_arr[i].REFERENCED = 0;
+            page_table_arr[i].MODIFIED = 0;
+            page_table_arr[i].WRITE_PROTECT = 0;
+            page_table_arr[i].FILEMAPPED = 0;
+
+            page_table_arr[i].frame_number = 0;
+        }
+    }
     // Initializes array of VMA Ranges used for PTE creation on pagefault
     void init_vma(const int num_vmas_)
     {
