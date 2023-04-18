@@ -180,24 +180,21 @@ public:
                 const char *r = entry.REFERENCED ? R.c_str() : dash.c_str();
                 const char *s = entry.PAGEDOUT ? S.c_str() : dash.c_str();
                 const char *m = entry.MODIFIED ? M.c_str() : dash.c_str();
-                printf(" %d:%s%s%s ", i, r, s, m);
+                printf(" %d:%s%s%s", i, r, m, s);
             }
             else
             {
                 if (entry.PAGEDOUT)
                 {
                     // PTEs that are not valid are represented by a ‘#’ if they have been swapped out
-                    printf(" %s ", hashtag.c_str());
+                    printf(" %s", hashtag.c_str());
                 }
                 else
                 {
                     // Or a ‘*’ if it does not have a swap area associated with.
-                    printf(" %s ", star.c_str());
+                    printf(" %s", star.c_str());
                 }
             }
-
-            const char *present_output = page_table_arr[i].PRESENT ? hashtag.c_str() : dash.c_str();
-            printf("%s", present_output);
         }
         printf("\n");
     }

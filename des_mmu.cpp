@@ -250,9 +250,12 @@ int main(int argc, char **argv)
             sscanf(line.c_str(), "%s %d", &operation, &vpage);
 
             // If O option print instruction details
-            if (O && (operation == 'c' || operation == 'w' || operation == 'e' || operation == 'r'))
+            if ((operation == 'c' || operation == 'w' || operation == 'e' || operation == 'r'))
             {
-                printf("%d: ==> %s %d\n", inst_count, &operation, vpage);
+                if (O)
+                {
+                    printf("%d: ==> %s %d\n", inst_count, &operation, vpage);
+                }
                 inst_count++;
             }
 

@@ -264,6 +264,9 @@ public:
             cost += process_arr[i].calc_total_cost();
         }
 
+        // Guess that context switches / proc exits count as instructions
+        inst_count += ctx_switches + process_exits;
+
         // Print out total cost information
         printf("TOTALCOST %lu %lu %lu %llu %lu\n",
                inst_count, ctx_switches, process_exits, cost, sizeof(pte_t));
@@ -284,7 +287,7 @@ public:
             }
             else
             {
-                printf(" %d:%d ", pid, page_num);
+                printf(" %d:%d", pid, page_num);
             }
         }
         printf("\n");
@@ -294,7 +297,7 @@ public:
     {
         for (int i = 0; i < num_processes; i++)
         {
-            printf("PT[%d]", i);
+            printf("PT[%d]:", i);
             process_arr[i].print_process_table();
         }
     }
