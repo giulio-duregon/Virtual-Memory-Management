@@ -198,18 +198,24 @@ public:
             if (page->FILEMAPPED)
             {
                 process->allocate_cost(FOUTS);
-                printf(" FOUT\n");
+                if (O)
+                {
+                    printf(" FOUT\n");
+                }
             }
             else
             {
                 process->allocate_cost(OUTS);
-                printf(" OUT\n");
+                // Set PAGEDOUT bit
+                page->PAGEDOUT = 1;
+                if (O)
+                {
+                    printf(" OUT\n");
+                }
             }
 
             // Reset modified bit
             page->MODIFIED = 0;
-            // Set PAGEDOUT bit
-            page->PAGEDOUT = 1;
         }
         // Clear Physical Frame mapping
         clear_mapping(frame_num);

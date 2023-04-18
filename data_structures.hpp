@@ -204,8 +204,8 @@ public:
             if (entry.PRESENT)
             {
                 const char *r = entry.REFERENCED ? R.c_str() : dash.c_str();
-                const char *s = entry.PAGEDOUT ? S.c_str() : dash.c_str();
                 const char *m = entry.MODIFIED ? M.c_str() : dash.c_str();
+                const char *s = entry.PAGEDOUT ? S.c_str() : dash.c_str();
                 printf(" %d:%s%s%s", i, r, m, s);
             }
             else
