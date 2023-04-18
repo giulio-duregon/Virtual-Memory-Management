@@ -17,6 +17,14 @@ enum PAGER_CYCLES
     PROC_EXIT = 1230,
 };
 
+enum ESC_NRU_PAGE_CLASSES
+{
+    CLASS_0 = 0,
+    CLASS_1 = 1,
+    CLASS_2 = 2,
+    CLASS_3 = 3,
+};
+
 // Define Pager Algo Types via Enum
 enum PAGER_TYPES
 {
@@ -470,6 +478,102 @@ private:
     }
     int query_len = 0;
     unsigned int CLOCK_HAND = 0;
+};
+
+// ESC_NRU Pager
+class ESC_NRU_Pager : Pager
+{
+public:
+    ESC_NRU_Pager(int NUM_FRAMES, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a){};
+
+    frame_t *select_victim_frame()
+    {
+        bool reset_ref = check_reset_ref_bit();
+        int start_hand_pos = CLOCK_HAND;
+        int victim_class = 0;
+
+        query_len = 0;
+        frame_t *free_frame = nullptr;
+
+        // Output desired information
+        if (a)
+        {
+            printf("ASELECT hand=%2d %d | %d %2d %2d\n", start_hand_pos, reset_ref, victim_class, free_frame->frame_number, query_len);
+        }
+
+        // Increment hand before next invocation, clear class pointers
+        increment_clock_hand();
+        clear_class_pointers();
+
+        // Return free frame
+        return free_frame;
+    }
+
+    // Helper function to see if enough instructions have passed
+    // that we should reset the reference bit
+    bool check_reset_ref_bit()
+    {
+        if ((inst_count - last_sweep_inst_count) >= RESET_REFBIT_THRESHOLD)
+        {
+            last_sweep_inst_count = inst_count;
+            return true;
+        }
+        return false;
+    }
+
+    // Helper function to determine if page belongs to class 0
+    bool is_class_zero(pte_t *page)
+    {
+        if ((!page->MODIFIED) && (!page->REFERENCED))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    // Get page classes (1-3) from page table entry
+    ESC_NRU_PAGE_CLASSES get_class(pte_t *page)
+    {
+        if ((page->REFERENCED) && (!page->MODIFIED))
+        {
+            return CLASS_1;
+        }
+        else if ((!page->REFERENCED) && (page->MODIFIED))
+        {
+            return CLASS_2;
+        }
+        else if ((page->REFERENCED) && (page->MODIFIED))
+        {
+            return CLASS_3;
+        }
+    }
+
+    // Helper function to clear class pointers between invocations
+    void clear_class_pointers()
+    {
+        class_one = nullptr;
+        class_two = nullptr;
+        class_three = nullptr;
+    }
+
+private:
+    const int RESET_REFBIT_THRESHOLD = 50;
+    unsigned long last_sweep_inst_count = 0;
+    pte_t *class_one = nullptr;
+    pte_t *class_two = nullptr;
+    pte_t *class_three = nullptr;
+    int CLOCK_HAND = 0;
+    int query_len = 0;
+
+    void increment_clock_hand()
+    {
+        CLOCK_HAND++;
+        query_len++;
+        if (CLOCK_HAND >= NUM_FRAMES)
+        {
+            CLOCK_HAND = 0;
+        }
+    }
 };
 
 // Helper function to build pager based on CLI input
