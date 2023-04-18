@@ -511,8 +511,8 @@ public:
             potential_victim_frame = &FRAME_TABLE[CLOCK_HAND];
 
             // Grab relevant Process / Frame
-            temp = &process_arr[free_frame->process_id];
-            pte_t *page = temp->get_vpage(free_frame->VMA_page_number);
+            temp = &process_arr[potential_victim_frame->process_id];
+            pte_t *page = temp->get_vpage(potential_victim_frame->VMA_page_number);
 
             // First check for class 0
             if (is_class_zero(page))
