@@ -95,31 +95,34 @@ int main(int argc, char **argv)
     }
 
     // Parse optional args
-    for (int i = 0; optional_args[i] != '\0'; i++)
+    if (optional_args)
     {
-        switch (std::toupper(optional_args[i]))
+        for (int i = 0; optional_args[i] != '\0'; i++)
         {
-        case 'O':
-            O = true;
-            break;
-        case 'P':
-            P = true;
-            break;
-        case 'F':
-            F = true;
-            break;
-        case 'S':
-            S = true;
-            break;
-        case 'X':
-            x = true;
-            break;
-        case 'Y':
-            y = true;
-            break;
-        case 'A':
-            a = true;
-            break;
+            switch (std::toupper(optional_args[i]))
+            {
+            case 'O':
+                O = true;
+                break;
+            case 'P':
+                P = true;
+                break;
+            case 'F':
+                F = true;
+                break;
+            case 'S':
+                S = true;
+                break;
+            case 'X':
+                x = true;
+                break;
+            case 'Y':
+                y = true;
+                break;
+            case 'A':
+                a = true;
+                break;
+            }
         }
     }
 
