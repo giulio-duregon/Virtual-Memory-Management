@@ -29,13 +29,9 @@ void read_write_logic(Pager *THE_PAGER, Process *CURRENT_PROCESS, const int vpag
 {
     // Add Read/Write cycle cost to pager for accounting
     THE_PAGER->allocate_cost(READ_WRITE);
-    bool test1 = !CURRENT_PROCESS->check_present_valid(vpage);
-    bool test2 = CURRENT_PROCESS->check_present_valid(vpage);
-    unsigned int test3 = CURRENT_PROCESS->check_present_valid(vpage);
-    printf("Test1=%d, Test2=%d Test3=%d\n", test1, test2, test3);
+
     if (!CURRENT_PROCESS->check_present_valid(vpage))
     {
-        printf("IN IF\n");
         // Page fault logic
         if (!CURRENT_PROCESS->vpage_can_be_accessed(vpage))
         {
@@ -60,10 +56,6 @@ void read_write_logic(Pager *THE_PAGER, Process *CURRENT_PROCESS, const int vpag
             // Update referenced bit, frame number on VPage
             THE_PAGER->map_frame(CURRENT_PROCESS, vpage, frame);
         }
-    }
-    else
-    {
-        printf("NOT IN IF\n");
     }
 }
 
