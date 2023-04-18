@@ -290,7 +290,7 @@ int main(int argc, char **argv)
                         if (O)
                         {
                             printf(" UNMAP %d:%d\n", current_process_num, i);
-                            if (temp->FILEMAPPED)
+                            if (temp->FILEMAPPED && temp->MODIFIED)
                             {
                                 printf(" FOUT\n");
                             }
