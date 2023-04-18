@@ -5,26 +5,6 @@
 #include "data_structures.hpp"
 #include "mmu_pagers.hpp"
 
-void update_offset(int &offset, int array_size)
-{
-    offset++;
-    // Increment offset and if we pass the array size loop back around
-    if (offset >= array_size)
-    {
-        offset = 0;
-    }
-}
-
-int rand_burst(int frame_t_size, int *randvals, int &offset, int array_size)
-{
-    if (offset >= array_size)
-    {
-        offset = 0;
-    }
-    // Grab random value
-    return (randvals[offset] % frame_t_size);
-}
-
 void read_write_logic(Pager *THE_PAGER, Process *CURRENT_PROCESS, const int vpage, bool O)
 {
     // Add Read/Write cycle cost to pager for accounting
