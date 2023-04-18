@@ -530,19 +530,19 @@ public:
                 switch (page_class)
                 {
                 case CLASS_1:
-                    if (!class_one_frame)
+                    if (class_one_frame == nullptr)
                     {
                         class_one_frame = potential_victim_frame;
                     }
                     break;
                 case CLASS_2:
-                    if (!class_two_frame)
+                    if (class_two_frame == nullptr)
                     {
                         class_two_frame = potential_victim_frame;
                     }
                     break;
                 case CLASS_3:
-                    if (!class_three_frame)
+                    if (class_three_frame == nullptr)
                     {
                         class_three_frame = potential_victim_frame;
                     }
@@ -564,25 +564,29 @@ public:
 
             // Increment hand and continue
             increment_clock_hand();
+            query_len++;
         }
 
         // If we haven't found a Class 0 frame and we've visited all frames, select lowest class as vitcim
-        if (!free_frame)
+        if (free_frame == nullptr)
         {
-            if (class_one_frame)
+            if (class_one_frame != nullptr)
             {
                 free_frame = class_one_frame;
                 victim_class = CLASS_1;
+                increment_clock_hand();
             }
-            else if (class_two_frame)
+            else if (class_two_frame != nullptr)
             {
                 free_frame = class_two_frame;
                 victim_class = CLASS_2;
+                increment_clock_hand();
             }
             else
             {
                 free_frame = class_three_frame;
                 victim_class = CLASS_3;
+                increment_clock_hand();
             }
         }
 
@@ -689,7 +693,6 @@ private:
     void increment_clock_hand()
     {
         CLOCK_HAND++;
-        query_len++;
         if (CLOCK_HAND >= NUM_FRAMES)
         {
             CLOCK_HAND = 0;
