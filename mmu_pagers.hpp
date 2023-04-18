@@ -137,33 +137,33 @@ public:
         vpage->REFERENCED = 1;
         vpage->EXISTS = 1;
 
-        // See if page has never been accessed, and is not file mapped
-        if (vpage->PAGEDOUT)
+        // See if reading in from file mapped page
+        if (vpage->FILEMAPPED)
         {
-            // We don't have to think about first-load logic
-            // Just bill / print the correct amount based on File Mapping
-            if (vpage->FILEMAPPED)
+            process->allocate_cost(FINS);
+            if (O)
             {
-                process->allocate_cost(FINS);
                 printf(" FIN\n");
             }
-            else
+        }
+        // See if we're reading from swap disk
+        else if (vpage->PAGEDOUT)
+        {
+            // Just bill / print the correct amount based on File Mapping
+            process->allocate_cost(INS);
+            if (O)
             {
-                process->allocate_cost(INS);
                 printf(" IN\n");
             }
         }
+        // Otherwise: An operating system must zero pages on first access (unless filemapped) to guarantee consistent behavior
         else
         {
-            if (!(vpage->FILEMAPPED))
+            if (O)
             {
-                if (O)
-                {
-                    printf(" ZERO\n");
-                }
-                // An operating system must zero pages on first access (unless filemapped) to guarantee consistent behavior
-                process->allocate_cost(ZEROS);
+                printf(" ZERO\n");
             }
+            process->allocate_cost(ZEROS);
         }
         // Update physical frame to reverse map to page
         FRAME_TABLE[free_frame->frame_number].process_id = process->get_pid();
