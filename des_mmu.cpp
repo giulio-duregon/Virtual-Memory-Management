@@ -140,7 +140,6 @@ int main(int argc, char **argv)
     rfile >> r_array_size;
 
     // Throw all the values of the file into array
-    int offset = 0;
     int *randvals{new int[r_array_size]{}};
     for (int i = 0; i < r_array_size; i++)
     {
