@@ -598,7 +598,12 @@ public:
 
         // Increment hand before next invocation, clear class pointers
         clear_class_pointers();
+        CLOCK_HAND = free_frame->frame_number + 1;
 
+        if (CLOCK_HAND >= NUM_FRAMES)
+        {
+            CLOCK_HAND = 0;
+        }
         // Return free frame
         return free_frame;
     }
@@ -659,11 +664,11 @@ public:
     // Get page classes (1-3) from page table entry
     ESC_NRU_PAGE_CLASSES get_class(pte_t *page)
     {
-        if ((page->REFERENCED) && (!page->MODIFIED))
+        if ((!page->REFERENCED) && (page->MODIFIED))
         {
             return CLASS_1;
         }
-        else if ((!page->REFERENCED) && (page->MODIFIED))
+        else if ((page->REFERENCED) && (!page->MODIFIED))
         {
             return CLASS_2;
         }
