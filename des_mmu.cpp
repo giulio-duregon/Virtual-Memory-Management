@@ -312,10 +312,9 @@ int main(int argc, char **argv)
                         {
                             CURRENT_PROCESS->allocate_cost(FOUTS);
                         }
-
-                        // Reset all pte_t bits to 0
-                        CURRENT_PROCESS->set_all_to_zero(temp);
                     }
+                    // Reset all pte_t bits to 0
+                    CURRENT_PROCESS->set_all_to_zero(temp);
                 }
                 break;
             case 'r':
