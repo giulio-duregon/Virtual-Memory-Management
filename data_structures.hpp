@@ -218,20 +218,9 @@ public:
             vma_range temp = vma_arr[i];
             if (vpage_num >= temp.START && vpage_num <= temp.END)
             {
-
-                page_table_arr[vpage_num].UNUSED_BITS = 0;
                 page_table_arr[vpage_num].EXISTS = 1;
-                page_table_arr[vpage_num].PID = 0;
-                page_table_arr[vpage_num].NOT_FIRST_ACCESS = 0;
-
-                page_table_arr[vpage_num].PAGEDOUT = 0;
-                page_table_arr[vpage_num].PRESENT = 0;
-                page_table_arr[vpage_num].REFERENCED = 0;
-                page_table_arr[vpage_num].MODIFIED = 0;
                 page_table_arr[vpage_num].WRITE_PROTECT = temp.WRITE_PROTECT;
                 page_table_arr[vpage_num].FILEMAPPED = temp.FILEMAPPED;
-
-                page_table_arr[vpage_num].frame_number = 0;
             }
         }
     }
