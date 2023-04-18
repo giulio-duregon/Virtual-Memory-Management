@@ -289,7 +289,7 @@ int main(int argc, char **argv)
 
                         if (O)
                         {
-                            printf(" UNMAP %d:%d", current_process_num, i);
+                            printf(" UNMAP %d:%d\n", current_process_num, i);
                         }
 
                         // Unmap frame
