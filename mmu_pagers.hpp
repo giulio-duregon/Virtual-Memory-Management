@@ -108,13 +108,7 @@ public:
         // If we have no free frames, select next victim frame
         if (free_list.empty())
         {
-            frame_t *free_frame = select_victim_frame();
-            // If option selected, output victim frame
-            if (a)
-            {
-                printf("ASELECT %d\n", free_frame->frame_number);
-            }
-            return free_frame;
+            return select_victim_frame();
         }
 
         // If we have free frames, pop & return the first one off
@@ -350,6 +344,11 @@ public:
         frame_t *free_frame = nullptr;
         free_frame = &FRAME_TABLE[CLOCK_HAND];
         increment_clock_hand();
+        // If option selected, output victim frame
+        if (a)
+        {
+            printf("ASELECT %d\n", free_frame->frame_number);
+        }
         return free_frame;
     };
 
@@ -383,6 +382,11 @@ public:
         int randval = gen_randval();
         free_frame = &FRAME_TABLE[randval];
 
+        // If option selected, output victim frame
+        if (a)
+        {
+            printf("ASELECT %d\n", free_frame->frame_number);
+        }
         return free_frame;
     }
 
@@ -404,6 +408,70 @@ private:
     }
 };
 
+// FIFO Pager Implementation
+class Clock_Pager : Pager
+{
+public:
+    Clock_Pager(int NUM_FRAMES, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a){};
+
+    frame_t *select_victim_frame()
+    {
+        // Helper variables
+        Process *temp;
+        query_len = 0;
+
+        // Select victim frame in clocklike fashion indexing into Frame Table
+        frame_t *free_frame = nullptr;
+        while (!free_frame)
+        {
+            // Select candidate victim frame
+            free_frame = &FRAME_TABLE[CLOCK_HAND];
+
+            // Grab relevant Process / Frame
+            temp = &process_arr[free_frame->process_id];
+            pte_t *page = temp->get_vpage(free_frame->VMA_page_number);
+
+            // Inspect Referenced bit
+            if (page->REFERENCED)
+            {
+                // If it has been referenced, reset the R bit
+                page->REFERENCED = 0;
+
+                // Reset free_frame to keep looping
+                free_frame = nullptr;
+            }
+
+            // No Else statement needed, if free_frame NOTEQ nullptr
+            // Then loop exits and free frame returned
+            increment_clock_hand();
+        }
+        // If option selected, output victim frame
+        if (a)
+        {
+            printf("ASELECT %d %d\n", free_frame->frame_number, query_len);
+        }
+        return free_frame;
+    };
+
+    int get_query_len()
+    {
+        return query_len;
+    }
+
+private:
+    void increment_clock_hand()
+    {
+        CLOCK_HAND++;
+        query_len++;
+        if (CLOCK_HAND >= NUM_FRAMES)
+        {
+            CLOCK_HAND = 0;
+        }
+    }
+    int query_len = 0;
+    unsigned int CLOCK_HAND = 0;
+};
+
 // Helper function to build pager based on CLI input
 Pager *build_pager(PAGER_TYPES pager_type, int NUM_FRAMES, int array_size, int *randvals, bool O, bool a)
 {
@@ -414,7 +482,7 @@ Pager *build_pager(PAGER_TYPES pager_type, int NUM_FRAMES, int array_size, int *
     case Random:
         return (Pager *)new Random_Pager(NUM_FRAMES, array_size, randvals, O, a);
     case Clock:
-        throw new NotImplemented;
+        return (Pager *)new Clock_Pager(NUM_FRAMES, O, a);
     case ESC_NRU:
         throw new NotImplemented;
     case Aging:
