@@ -14,7 +14,7 @@ BIN=des_mmu
 If running on linserv1, make sure to load in gcc version 9.2.0:
 
 ```bash
-> module load gcc-9.2.0
+> module load gcc-9.2
 > module unload gcc-4.8.5 # Unload the old version
 ```
 
