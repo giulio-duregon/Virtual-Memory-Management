@@ -314,6 +314,7 @@ int main(int argc, char **argv)
                 {
                     // Then we raise a SEGPROT error as we cannot write to this VMA
                     CURRENT_PROCESS->allocate_cost(SEGPROT);
+                    printf(" SEGPROT\n");
                 }
                 else
                 {
