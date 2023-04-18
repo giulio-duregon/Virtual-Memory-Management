@@ -284,7 +284,7 @@ public:
             int page_num = FRAME_TABLE[i].VMA_page_number;
             if (pid == -1 || page_num == -1)
             {
-                printf(" * ");
+                printf(" *");
             }
             else
             {
