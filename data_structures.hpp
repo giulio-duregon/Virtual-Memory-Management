@@ -25,9 +25,6 @@ enum PROC_CYCLES
 };
 
 // VALUES (Cant Store in ENUM as 410 occurs twice)
-const unsigned int int_readwrite = 1;
-const unsigned int int_contextswitch = 130;
-const unsigned int int_procexit = 1230;
 const unsigned int int_maps = 350;
 const unsigned int int_unmaps = 410;
 const unsigned int int_ins = 3200;
@@ -48,7 +45,7 @@ typedef struct vma_range
     unsigned int END : 7;
     unsigned int WRITE_PROTECT : 1;
     unsigned int FILEMAPPED : 1; // File mapped Flag
-};
+} vma_range;
 
 // VMA Page Bitfield structure -> Contains Protection Flags metadata and frame_number
 typedef struct pte_t
@@ -69,7 +66,7 @@ typedef struct pte_t
 
     // Page number bits (Supports 128 frames as maximum)
     unsigned int frame_number : 7;
-};
+} pte_t;
 
 // Frame Table Struct - Stores Data for Reverse Mapping frame -> page
 typedef struct frame_t
