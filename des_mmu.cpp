@@ -25,7 +25,7 @@ int rand_burst(int frame_t_size, int *randvals, int &offset, int array_size)
     return (randvals[offset] % frame_t_size);
 }
 
-void read_write_logic(Pager *THE_PAGER, Process *CURRENT_PROCESS, const int vpage)
+void read_write_logic(Pager *THE_PAGER, Process *CURRENT_PROCESS, const int vpage, bool O)
 {
     // Add Read/Write cycle cost to pager for accounting
     THE_PAGER->allocate_cost(READ_WRITE);
@@ -35,10 +35,12 @@ void read_write_logic(Pager *THE_PAGER, Process *CURRENT_PROCESS, const int vpag
         // Page fault logic
         if (!CURRENT_PROCESS->vpage_can_be_accessed(vpage))
         {
-            // TODO: Output SEGV Line?
-
             // Allocate cost of a segmentation violation
             CURRENT_PROCESS->allocate_cost(SEGV);
+            if (O)
+            {
+                printf(" SEGV\n");
+            }
             return;
         }
         else
@@ -302,12 +304,12 @@ int main(int argc, char **argv)
                 break;
             case 'r':
                 // Read instruction logic
-                read_write_logic(THE_PAGER, CURRENT_PROCESS, vpage);
+                read_write_logic(THE_PAGER, CURRENT_PROCESS, vpage, O);
                 CURRENT_PROCESS->set_referenced(vpage);
                 break;
             case 'w':
                 // Write instruction logic
-                read_write_logic(THE_PAGER, CURRENT_PROCESS, vpage);
+                read_write_logic(THE_PAGER, CURRENT_PROCESS, vpage, O);
 
                 // Check if write protect is enabled, if so raise SEGPROT
                 if (CURRENT_PROCESS->write_protect_enabled(vpage))
