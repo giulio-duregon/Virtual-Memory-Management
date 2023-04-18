@@ -32,6 +32,7 @@ void read_write_logic(Pager *THE_PAGER, Process *CURRENT_PROCESS, const int vpag
 
     if (!CURRENT_PROCESS->check_present_valid(vpage))
     {
+        printf("IN IF\n");
         // Page fault logic
         if (!CURRENT_PROCESS->vpage_can_be_accessed(vpage))
         {
@@ -56,6 +57,10 @@ void read_write_logic(Pager *THE_PAGER, Process *CURRENT_PROCESS, const int vpag
             // Update referenced bit, frame number on VPage
             THE_PAGER->map_frame(CURRENT_PROCESS, vpage, frame);
         }
+    }
+    else
+    {
+        printf("NOT IN IF\n");
     }
 }
 
