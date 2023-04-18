@@ -275,6 +275,10 @@ int main(int argc, char **argv)
             case 'e':
                 // Add Process-Exit cycle cost to pager for accounting
                 THE_PAGER->allocate_cost(PROC_EXIT);
+                if (O)
+                {
+                    printf("EXIT current process %d\n", current_process_num);
+                }
 
                 // Traverse active process page table, each valid entry unmap the page
                 for (int i = 0; i < NUM_PTE; i++)
@@ -282,7 +286,12 @@ int main(int argc, char **argv)
                     pte_t *temp = CURRENT_PROCESS->get_vpage(i);
                     if (temp->PRESENT)
                     {
-                        // TODO: May have to add some printf's here
+
+                        if (O)
+                        {
+                            printf(" UNMAP %d:%d", current_process_num, i);
+                        }
+
                         // Unmap frame
                         unsigned int frame_num = temp->frame_number;
                         THE_PAGER->clear_mapping(frame_num);
