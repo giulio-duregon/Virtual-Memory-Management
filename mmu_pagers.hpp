@@ -74,11 +74,12 @@ public:
 class Pager
 {
 public:
-    Pager(unsigned int NUM_FRAMES_, PAGER_TYPES ptype_, bool O_)
+    Pager(unsigned int NUM_FRAMES_, PAGER_TYPES ptype_, bool O_, bool a_)
     {
         NUM_FRAMES = NUM_FRAMES_;
         ptype = ptype_;
         O = O_;
+        a = a_;
 
         // Dynamically create the frame table array based on input args
         FRAME_TABLE = new frame_t[NUM_FRAMES];
@@ -107,7 +108,13 @@ public:
         // If we have no free frames, select next victim frame
         if (free_list.empty())
         {
-            return select_victim_frame();
+            frame_t *free_frame = select_victim_frame();
+            // If option selected, output victim frame
+            if (a)
+            {
+                printf("ASELECT %d\n", free_frame->frame_number);
+            }
+            return free_frame;
         }
 
         // If we have free frames, pop & return the first one off
@@ -321,6 +328,7 @@ public:
 protected:
     unsigned int NUM_FRAMES = 0;
     bool O = false;
+    bool a = false;
     frame_t *FRAME_TABLE;
     std::deque<frame_t *> free_list;
     unsigned long long cost = 0;
@@ -335,24 +343,17 @@ protected:
 class FIFO_Pager : Pager
 {
 public:
-    FIFO_Pager(int NUM_FRAMES, bool O, bool a_) : Pager(NUM_FRAMES, FIFO, O) { a = a_; };
+    FIFO_Pager(int NUM_FRAMES, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a){};
     frame_t *select_victim_frame()
     {
         // Select victim frame in clocklike fashion indexing into Frame Table
         frame_t *free_frame = nullptr;
         free_frame = &FRAME_TABLE[CLOCK_HAND];
-
-        // If option selected, output victim frame
-        if (a)
-        {
-            printf("ASELECT %d\n", CLOCK_HAND);
-        }
         increment_clock_hand();
         return free_frame;
     };
 
 private:
-    bool a;
     void increment_clock_hand()
     {
         CLOCK_HAND++;
@@ -364,15 +365,63 @@ private:
     unsigned int CLOCK_HAND = 0;
 };
 
+// Random Algorithm Implementation
+
+class Random_Pager : Pager
+{
+public:
+    Random_Pager(int NUM_FRAMES, int array_size_, int *randvals_, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a)
+    {
+        array_size = array_size_;
+        randvals = randvals_;
+    };
+
+    frame_t *select_victim_frame()
+    {
+        // Select victim frame in clocklike fashion indexing into Frame Table
+        frame_t *free_frame = nullptr;
+        int randval = gen_randval();
+        free_frame = &FRAME_TABLE[randval];
+
+        return free_frame;
+    }
+
+private:
+    int offset = 0;
+    int array_size = 0;
+    int *randvals;
+
+    int gen_randval()
+    {
+        if (offset >= array_size)
+        {
+            offset = 0;
+        }
+        offset++;
+        // Grab random value
+        return (randvals[offset] % NUM_FRAMES);
+    }
+
+    // void update_offset()
+    // {
+    //     offset++;
+    //     // Increment offset and if we pass the array size loop back around
+    //     if (offset >= array_size)
+    //     {
+    //         offset = 0;
+    //     }
+    // }
+};
+
 // Helper function to build pager based on CLI input
-Pager *build_pager(PAGER_TYPES pager_type, int NUM_FRAMES, bool O, bool a)
+Pager *build_pager(PAGER_TYPES pager_type, int NUM_FRAMES, int array_size, int *randvals, bool O, bool a)
 {
     switch (pager_type)
     {
     case FIFO:
         return (Pager *)new FIFO_Pager(NUM_FRAMES, O, a);
     case Random:
-        throw new NotImplemented;
+        return (Pager *)new Random_Pager(NUM_FRAMES, array_size, randvals, O, a);
     case Clock:
         throw new NotImplemented;
     case ESC_NRU:

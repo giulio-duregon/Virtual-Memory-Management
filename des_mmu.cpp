@@ -170,7 +170,7 @@ int main(int argc, char **argv)
 
     // Initialize Pager Algorithm from Input
     PAGER_TYPES pager_type = parse_pager_type_from_input(char_sched_type);
-    THE_PAGER = build_pager(pager_type, NUM_FRAMES, O, a);
+    THE_PAGER = build_pager(pager_type, NUM_FRAMES, r_array_size, randvals, O, a);
 
     // TODO: DELETE
     // printf("Pager Algo (Enum): %d Pager Algo (Name): %s\n", THE_PAGER->ptype, GET_PAGER_NAME_FROM_ENUM(THE_PAGER->ptype));
