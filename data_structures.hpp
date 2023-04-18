@@ -25,18 +25,18 @@ enum PROC_CYCLES
 };
 
 // VALUES (Cant Store in ENUM as 410 occurs twice)
-const int int_readwrite = 1;
-const int int_contextswitch = 130;
-const int int_procexit = 1230;
-const int int_maps = 350;
-const int int_unmaps = 410;
-const int int_ins = 3200;
-const int int_outs = 2750;
-const int int_fins = 2350;
-const int int_fouts = 2800;
-const int int_zeros = 150;
-const int int_segv = 440;
-const int int_segprot = 410;
+const unsigned int int_readwrite = 1;
+const unsigned int int_contextswitch = 130;
+const unsigned int int_procexit = 1230;
+const unsigned int int_maps = 350;
+const unsigned int int_unmaps = 410;
+const unsigned int int_ins = 3200;
+const unsigned int int_outs = 2750;
+const unsigned int int_fins = 2350;
+const unsigned int int_fouts = 2800;
+const unsigned int int_zeros = 150;
+const unsigned int int_segv = 440;
+const unsigned int int_segprot = 410;
 
 // Max number of page table entries
 const unsigned int NUM_PTE = 64;
@@ -44,8 +44,8 @@ const unsigned int NUM_PTE = 64;
 // VMA Range For Lazy Page initialization
 typedef struct vma_range
 {
-    unsigned int START;
-    unsigned int END;
+    unsigned int START : 7;
+    unsigned int END : 7;
     unsigned int WRITE_PROTECT : 1;
     unsigned int FILEMAPPED : 1; // File mapped Flag
 } vma_range;
