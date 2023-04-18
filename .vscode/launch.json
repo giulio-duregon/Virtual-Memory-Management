@@ -11,12 +11,12 @@
             "program": "${fileDirname}/${fileBasenameNoExtension}",
             "args": [
                 "-f",
-                "4",
+                "16",
                 "-o",
                 "aOPFS",
                 "-a",
                 "e",
-                "in1",
+                "in3",
                 "rfile"
             ],
             "stopAtEntry": false,

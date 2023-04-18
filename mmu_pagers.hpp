@@ -643,7 +643,8 @@ public:
     // that we should reset the reference bit
     bool check_reset_ref_bit()
     {
-        if ((inst_count - last_sweep_inst_count) >= RESET_REFBIT_THRESHOLD)
+        // First instruction is instruction 0, makin this an annoying off-by 1 error
+        if ((inst_count - last_sweep_inst_count) >= (RESET_REFBIT_THRESHOLD - 1))
         {
             last_sweep_inst_count = inst_count;
             return true;
