@@ -746,7 +746,7 @@ public:
             unsigned int potential_victim_age = potential_victim_frame->age;
             if (a)
             {
-                printf("%d:%o ", potential_victim_frame->frame_number, potential_victim_frame->age);
+                printf("%d:%X ", potential_victim_frame->frame_number, potential_victim_frame->age);
             }
 
             // If this is the first, it counts as the youngest (temporarily)
@@ -835,6 +835,14 @@ private:
     }
 };
 
+class Working_Set_Pager : Pager
+{
+public:
+    Working_Set_Pager(int NUM_FRAMES, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a){};
+
+private:
+};
+
 // Helper function to build pager based on CLI input
 Pager *build_pager(PAGER_TYPES pager_type, int NUM_FRAMES, int array_size, int *randvals, bool O, bool a)
 {
@@ -851,7 +859,7 @@ Pager *build_pager(PAGER_TYPES pager_type, int NUM_FRAMES, int array_size, int *
     case Aging:
         return (Pager *)new Aging_Pager(NUM_FRAMES, O, a);
     case Working_Set:
-        throw new NotImplemented;
+        return (Pager *)new Working_Set_Pager(NUM_FRAMES, O, a);
     }
 }
 #endif
