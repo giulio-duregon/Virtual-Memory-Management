@@ -72,7 +72,7 @@ typedef struct pte_t
 typedef struct frame_t
 {
     // For Aging paging algorithm
-    unsigned long age : 32;
+    unsigned int age : 32;
     // Frame number
     unsigned int frame_number : 7;
 
