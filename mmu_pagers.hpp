@@ -887,6 +887,11 @@ public:
             if (is_class_zero(page, potential_victim_frame))
             {
                 free_frame = potential_victim_frame;
+                if (a)
+                {
+                    printf("STOP(%d) ", query_len);
+                }
+
                 break;
             }
             else
@@ -950,7 +955,11 @@ public:
         // Set clock hand back to appropriate spot
         CLOCK_HAND = free_frame->frame_number;
         increment_clock_hand();
-        printf("| %d\n", free_frame->frame_number);
+        if (a)
+        {
+            printf("| %d\n", free_frame->frame_number);
+        }
+
         return free_frame;
     }
 
@@ -965,12 +974,12 @@ public:
     }
 
 private:
-    const unsigned int TAU = 50;
+    const unsigned int TAU = 49;
 
     // Helper function to determine if page belongs to class 0
     bool is_class_zero(pte_t *page, frame_t *frame)
     {
-        if ((!page->REFERENCED) && (inst_count - frame->age) >= TAU)
+        if ((!page->REFERENCED) && (inst_count - frame->age - 1) > TAU)
         {
             return true;
         }
