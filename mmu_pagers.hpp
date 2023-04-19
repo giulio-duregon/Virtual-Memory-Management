@@ -89,7 +89,7 @@ public:
 class Pager
 {
 public:
-    Pager(unsigned int NUM_FRAMES_, PAGER_TYPES ptype_, bool O_, bool a_)
+    Pager(PAGER_TYPES ptype_, unsigned int NUM_FRAMES_, bool O_, bool a_)
     {
         NUM_FRAMES = NUM_FRAMES_;
         ptype = ptype_;
@@ -362,7 +362,7 @@ protected:
 class FIFO_Pager : Pager
 {
 public:
-    FIFO_Pager(int NUM_FRAMES, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a){};
+    FIFO_Pager(int NUM_FRAMES, bool O, bool a) : Pager(FIFO, NUM_FRAMES, O, a){};
     frame_t *select_victim_frame()
     {
         // Select victim frame in clocklike fashion indexing into Frame Table
@@ -383,7 +383,7 @@ public:
 class Random_Pager : Pager
 {
 public:
-    Random_Pager(int NUM_FRAMES, int array_size_, int *randvals_, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a)
+    Random_Pager(int NUM_FRAMES, int array_size_, int *randvals_, bool O, bool a) : Pager(Random, NUM_FRAMES, O, a)
     {
         array_size = array_size_;
         randvals = randvals_;
@@ -426,7 +426,7 @@ private:
 class Clock_Pager : Pager
 {
 public:
-    Clock_Pager(int NUM_FRAMES, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a){};
+    Clock_Pager(int NUM_FRAMES, bool O, bool a) : Pager(Clock, NUM_FRAMES, O, a){};
 
     frame_t *select_victim_frame()
     {
@@ -478,7 +478,7 @@ public:
 class ESC_NRU_Pager : Pager
 {
 public:
-    ESC_NRU_Pager(int NUM_FRAMES, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a){};
+    ESC_NRU_Pager(int NUM_FRAMES, bool O, bool a) : Pager(ESC_NRU, NUM_FRAMES, O, a){};
 
     frame_t *select_victim_frame()
     {
@@ -701,7 +701,7 @@ private:
 class Aging_Pager : Pager
 {
 public:
-    Aging_Pager(int NUM_FRAMES, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a){};
+    Aging_Pager(int NUM_FRAMES, bool O, bool a) : Pager(Aging, NUM_FRAMES, O, a){};
 
     frame_t *select_victim_frame()
     {
@@ -833,7 +833,7 @@ private:
 class Working_Set_Pager : Pager
 {
 public:
-    Working_Set_Pager(int NUM_FRAMES, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a){};
+    Working_Set_Pager(int NUM_FRAMES, bool O, bool a) : Pager(Working_Set, NUM_FRAMES, O, a){};
 
     frame_t *select_victim_frame()
     {
