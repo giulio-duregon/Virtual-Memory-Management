@@ -708,8 +708,79 @@ class Aging_Pager : Pager
 public:
     Aging_Pager(int NUM_FRAMES, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a){};
 
-    frame_t *select_victim_frame(){
+    frame_t *select_victim_frame()
+    {
+        // Helper vars
+        int start_hand_pos = CLOCK_HAND;
+        frame_t *free_frame = nullptr;
+        frame_t *temp_youngest = nullptr;
+        unsigned int youngest_age = 0;
 
+        // Rest query len
+        query_len = 0;
+
+        if (a)
+        {
+            if (start_hand_pos == 0)
+            {
+                printf("ASELECT %d-%d | ", start_hand_pos, NUM_FRAMES - 1);
+            }
+            else
+            {
+                printf("ASELECT %d-%d | ", start_hand_pos, start_hand_pos - 1);
+            }
+        }
+        // Iterate over all frames only once
+        while (!free_frame)
+        {
+            if (start_hand_pos == CLOCK_HAND && (query_len > 0))
+            {
+                break;
+            }
+
+            // Grab frame / age
+            frame_t *potential_victim_frame = &FRAME_TABLE[CLOCK_HAND];
+
+            // Age the frame we just considered
+            age_frame(potential_victim_frame);
+            unsigned int potential_victim_age = potential_victim_frame->age;
+            if (a)
+            {
+                printf("%d:%o ", potential_victim_frame->frame_number, potential_victim_frame->age);
+            }
+
+            // If this is the first, it counts as the youngest (temporarily)
+            if (youngest_age == 0)
+            {
+                youngest_age = potential_victim_age;
+                temp_youngest = potential_victim_frame;
+            }
+            else
+            {
+                // Update youngest found if current is younger
+                if (potential_victim_age < youngest_age)
+                {
+                    youngest_age = potential_victim_age;
+                    temp_youngest = potential_victim_frame;
+                }
+            }
+
+            // Keep searching
+            increment_clock_hand();
+            query_len++;
+        }
+
+        free_frame = temp_youngest;
+        // Reset clock hand and return free frame
+        CLOCK_HAND = free_frame->frame_number;
+        increment_clock_hand();
+
+        if (a)
+        {
+            printf("| %d\n", free_frame->frame_number);
+        }
+
+        return free_frame;
     };
 
     void map_frame(Process *process, int vpage_num, frame_t *free_frame)
@@ -726,13 +797,41 @@ public:
     }
 
 private:
-    void set_leading_bit_to_one(frame_t *frame)
+    void age_frame(frame_t *potential_victim_frame)
+    {
+        // Get VPAGE
+        Process *temp = &process_arr[potential_victim_frame->process_id];
+        pte_t *page = temp->get_vpage(potential_victim_frame->VMA_page_number);
+
+        // Shift Right
+        shift_age_right(potential_victim_frame);
+
+        // Add R bit to leading
+        if (page->REFERENCED)
+        {
+            set_leading_bit_to_one(potential_victim_frame);
+        }
+        // If its 1, must be reset to 0
+        page->REFERENCED = 0;
+    }
+
+    inline void set_leading_bit_to_one(frame_t *frame)
     {
         frame->age = frame->age | 0x80000000;
     }
-    void shift_age_right(frame_t *frame)
+
+    inline void shift_age_right(frame_t *frame)
     {
         frame->age = frame->age >> 1;
+    }
+
+    void increment_clock_hand()
+    {
+        CLOCK_HAND++;
+        if (CLOCK_HAND >= NUM_FRAMES)
+        {
+            CLOCK_HAND = 0;
+        }
     }
 };
 

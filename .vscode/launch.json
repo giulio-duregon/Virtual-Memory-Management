@@ -15,8 +15,8 @@
                 "-o",
                 "aOPFS",
                 "-a",
-                "e",
-                "in3",
+                "a",
+                "in1",
                 "rfile"
             ],
             "stopAtEntry": false,
