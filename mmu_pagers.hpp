@@ -97,6 +97,7 @@ public:
         {
             // Assing a frame number
             FRAME_TABLE[i].frame_number = i;
+            FRAME_TABLE[i].age = 0;
 
             // Add it to the free frame queue
             free_list.push_back(&FRAME_TABLE[i]);
@@ -132,7 +133,7 @@ public:
 
     // Maps a physical frame to a VMA page
     // pte_t struct -> frame_t struct
-    void map_frame(Process *process, int vpage_num, frame_t *free_frame)
+    virtual void map_frame(Process *process, int vpage_num, frame_t *free_frame)
     {
         // Allocate cost of MAPS + grab vpage
         process->allocate_cost(MAPS);
@@ -185,7 +186,7 @@ public:
         }
     };
 
-    void unmap_frame(unsigned int pid, unsigned int old_page_num)
+    virtual void unmap_frame(unsigned int pid, unsigned int old_page_num)
     {
         // Get correct pointer to victim process + frame to be unmapped
         Process *process = &process_arr[pid];
@@ -705,6 +706,34 @@ private:
     }
 };
 
+class Aging_Pager : Pager
+{
+public:
+    Aging_Pager(int NUM_FRAMES, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a){};
+
+    frame_t *select_victim_frame(){};
+
+    void map_frame(Process *process, int vpage_num, frame_t *free_frame)
+    {
+        Pager::map_frame(process, vpage_num, free_frame);
+    }
+
+    void unmap_frame(unsigned int pid, unsigned int old_page_num)
+    {
+        Pager::unmap_frame(pid, old_page_num);
+    }
+
+private:
+    void set_leading_bit_to_one(frame_t *frame)
+    {
+        frame->age = frame->age | 0x80000000;
+    }
+    void shift_age_right(frame_t *frame)
+    {
+        frame->age = frame->age >> 1;
+    }
+};
+
 // Helper function to build pager based on CLI input
 Pager *build_pager(PAGER_TYPES pager_type, int NUM_FRAMES, int array_size, int *randvals, bool O, bool a)
 {
@@ -719,7 +748,7 @@ Pager *build_pager(PAGER_TYPES pager_type, int NUM_FRAMES, int array_size, int *
     case ESC_NRU:
         return (Pager *)new ESC_NRU_Pager(NUM_FRAMES, O, a);
     case Aging:
-        throw new NotImplemented;
+        return (Pager *)new Aging_Pager(NUM_FRAMES, O, a);
     case Working_Set:
         throw new NotImplemented;
     }

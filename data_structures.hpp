@@ -71,6 +71,8 @@ typedef struct pte_t
 // Frame Table Struct - Stores Data for Reverse Mapping frame -> page
 typedef struct frame_t
 {
+    // For Aging paging algorithm
+    unsigned long age : 32;
     // Frame number
     unsigned int frame_number : 7;
 
