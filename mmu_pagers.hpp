@@ -25,6 +25,13 @@ enum ESC_NRU_PAGE_CLASSES
     CLASS_3 = 3,
 };
 
+enum WS_FRAME_CLASSES
+{
+    WS_CLASS_0 = 0,
+    WS_CLASS_1 = 1,
+    WS_CLASS_2 = 2,
+};
+
 // Define Pager Algo Types via Enum
 enum PAGER_TYPES
 {
@@ -830,12 +837,18 @@ public:
 
     frame_t *select_victim_frame()
     {
+        // Helper vars
         frame_t *free_frame = nullptr;
-        frame_t *youngest_frame = nullptr;
-        unsigned int youngest_age = 0;
         int start_hand_pos = CLOCK_HAND;
         query_len = 0;
 
+        // Keep track of candidate victim frames
+        frame_t *oldest_class_one_frame = nullptr;
+        frame_t *oldest_class_two_frame = nullptr;
+        unsigned int oldest_class_one_age = 0;
+        unsigned int oldest_class_two_age = 0;
+
+        // Option for verbose output
         if (a)
         {
             if (start_hand_pos == 0)
@@ -848,6 +861,7 @@ public:
             }
         }
 
+        // Begin our search for our victim frame
         while (!free_frame)
         {
             // Make sure we only visit each frame only once
@@ -861,33 +875,57 @@ public:
             Process *temp_proc = &process_arr[potential_victim_frame->process_id];
             pte_t *page = temp_proc->get_vpage(potential_victim_frame->VMA_page_number);
 
-            // If the page age is > TAU and its not referenced, it's selected
-            if (((inst_count - potential_victim_frame->age) >= TAU) && (!page->REFERENCED))
+            // Verbose output print options
+            if (a)
+            {
+                printf("%d(%d %d:%d %d) ", CLOCK_HAND, page->REFERENCED, potential_victim_frame->process_id,
+                       potential_victim_frame->VMA_page_number, potential_victim_frame->age);
+            }
+
+            // Check if we've found a frame with class = 0
+            // Class = 0 means frame age >= TAU and REF = 0
+            if (is_class_zero(page, potential_victim_frame))
             {
                 free_frame = potential_victim_frame;
+                break;
             }
-            // If the page was referenced, update time and reset ref bit
-            else if (page->REFERENCED)
-            {
-                potential_victim_frame->age = inst_count;
-                page->REFERENCED = 0;
-            }
-            // Otherwise its frame_age < tau and ref=0 -- keep youngest candidate for eviction
             else
             {
-                // Keep track of youngest frame
-                if (youngest_age == 0)
+                // Otherwise get frame class and decide what to do
+                WS_FRAME_CLASSES frame_class = get_frame_ws_class(page, potential_victim_frame);
+
+                switch (frame_class)
                 {
-                    youngest_age = potential_victim_frame->age;
-                    youngest_frame = potential_victim_frame;
-                }
-                else
-                {
-                    if (potential_victim_frame->age < youngest_age)
+                // Class 1: A unreferenced page with age < TAU
+                case WS_CLASS_1:
+                    // If this is the first frame we've seen of this class, by default it is the oldest
+                    if (oldest_class_one_age == 0)
                     {
-                        youngest_age = potential_victim_frame->age;
-                        youngest_frame = potential_victim_frame;
+                        oldest_class_one_age = potential_victim_frame->age;
+                        oldest_class_one_frame = potential_victim_frame;
                     }
+                    else
+                    {
+                        // Otherwise, check if oldest needs to be updated
+                        if (potential_victim_frame->age > oldest_class_one_age)
+                        {
+                            oldest_class_one_age = potential_victim_frame->age;
+                            oldest_class_one_frame = potential_victim_frame;
+                        }
+                    }
+                    break;
+
+                // Class 2, a referenced page
+                case WS_CLASS_2:
+                    if (!oldest_class_two_frame)
+                    {
+                        oldest_class_two_age = potential_victim_frame->age;
+                        oldest_class_two_frame = potential_victim_frame;
+                    }
+
+                    // Reset R bit and set age
+                    mark_frame_and_page(page, potential_victim_frame);
+                    break;
                 }
             }
 
@@ -899,12 +937,20 @@ public:
         // If we didn't find a frame in the loop, then we select the youngest
         if (!free_frame)
         {
-            free_frame = youngest_frame;
+            if (oldest_class_one_frame)
+            {
+                free_frame = oldest_class_one_frame;
+            }
+            else
+            {
+                free_frame = oldest_class_two_frame;
+            }
         }
 
         // Set clock hand back to appropriate spot
         CLOCK_HAND = free_frame->frame_number;
         increment_clock_hand();
+        printf("| %d\n", free_frame->frame_number);
         return free_frame;
     }
 
@@ -918,6 +964,33 @@ public:
 
 private:
     const unsigned int TAU = 50;
+
+    // Helper function to determine if page belongs to class 0
+    bool is_class_zero(pte_t *page, frame_t *frame)
+    {
+        if ((!page->REFERENCED) && (inst_count - frame->age) >= TAU)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    // Helper function to get class of frame
+    WS_FRAME_CLASSES get_frame_ws_class(pte_t *page, frame_t *frame)
+    {
+        if (page->REFERENCED)
+        {
+            return WS_CLASS_2;
+        }
+        return WS_CLASS_1;
+    }
+
+    // Helper function to reset REF bit and set age
+    inline void mark_frame_and_page(pte_t *page, frame_t *frame)
+    {
+        page->REFERENCED = 0;
+        frame->age = inst_count;
+    }
 };
 
 // Helper function to build pager based on CLI input
