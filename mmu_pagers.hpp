@@ -957,7 +957,9 @@ public:
     void map_frame(Process *process, int vpage_num, frame_t *free_frame)
     {
         // When mapping a frame set its age to instruction count
-        free_frame->age = inst_count;
+        // -1 as inst_count is incremented before frames are allocated
+        // due to the accounting i've set up with billing read/writes
+        free_frame->age = inst_count - 1;
 
         Pager::map_frame(process, vpage_num, free_frame);
     }
@@ -989,7 +991,8 @@ private:
     inline void mark_frame_and_page(pte_t *page, frame_t *frame)
     {
         page->REFERENCED = 0;
-        frame->age = inst_count;
+        // -1 as count gets incremented on read/write allocation before frame is allocated
+        frame->age = inst_count - 1;
     }
 };
 
