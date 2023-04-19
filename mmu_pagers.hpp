@@ -907,7 +907,7 @@ public:
                     else
                     {
                         // Otherwise, check if oldest needs to be updated
-                        if (potential_victim_frame->age > oldest_class_one_age)
+                        if (potential_victim_frame->age < oldest_class_one_age)
                         {
                             oldest_class_one_age = potential_victim_frame->age;
                             oldest_class_one_frame = potential_victim_frame;
