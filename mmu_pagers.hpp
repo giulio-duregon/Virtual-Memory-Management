@@ -328,6 +328,8 @@ public:
     }
 
 protected:
+    int CLOCK_HAND = 0;
+    int query_len = 0;
     unsigned int NUM_FRAMES = 0;
     bool O = false;
     bool a = false;
@@ -369,7 +371,6 @@ private:
             CLOCK_HAND = 0;
         }
     }
-    unsigned int CLOCK_HAND = 0;
 };
 
 // Random Algorithm Implementation
@@ -476,8 +477,6 @@ private:
             CLOCK_HAND = 0;
         }
     }
-    int query_len = 0;
-    unsigned int CLOCK_HAND = 0;
 };
 
 // ESC_NRU Pager
@@ -693,8 +692,6 @@ private:
     frame_t *class_one_frame = nullptr;
     frame_t *class_two_frame = nullptr;
     frame_t *class_three_frame = nullptr;
-    int CLOCK_HAND = 0;
-    int query_len = 0;
 
     void increment_clock_hand()
     {
@@ -711,10 +708,15 @@ class Aging_Pager : Pager
 public:
     Aging_Pager(int NUM_FRAMES, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a){};
 
-    frame_t *select_victim_frame(){};
+    frame_t *select_victim_frame(){
+
+    };
 
     void map_frame(Process *process, int vpage_num, frame_t *free_frame)
     {
+        // Reset Age every MAP operation
+        free_frame->age = 0;
+
         Pager::map_frame(process, vpage_num, free_frame);
     }
 
