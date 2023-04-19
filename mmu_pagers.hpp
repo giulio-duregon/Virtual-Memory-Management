@@ -341,6 +341,14 @@ protected:
     unsigned long process_exits = 0;
     Process *process_arr;
     int num_processes = 0;
+    void increment_clock_hand()
+    {
+        CLOCK_HAND++;
+        if (CLOCK_HAND >= NUM_FRAMES)
+        {
+            CLOCK_HAND = 0;
+        }
+    }
 };
 
 // FIFO Pager Implementation
@@ -361,16 +369,6 @@ public:
         }
         return free_frame;
     };
-
-private:
-    void increment_clock_hand()
-    {
-        CLOCK_HAND++;
-        if (CLOCK_HAND >= NUM_FRAMES)
-        {
-            CLOCK_HAND = 0;
-        }
-    }
 };
 
 // Random Algorithm Implementation
@@ -453,6 +451,7 @@ public:
             // No Else statement needed, if free_frame NOTEQ nullptr
             // Then loop exits and free frame returned
             increment_clock_hand();
+            query_len++;
         }
         // If option selected, output victim frame
         if (a)
@@ -465,17 +464,6 @@ public:
     int get_query_len()
     {
         return query_len;
-    }
-
-private:
-    void increment_clock_hand()
-    {
-        CLOCK_HAND++;
-        query_len++;
-        if (CLOCK_HAND >= NUM_FRAMES)
-        {
-            CLOCK_HAND = 0;
-        }
     }
 };
 
@@ -840,7 +828,96 @@ class Working_Set_Pager : Pager
 public:
     Working_Set_Pager(int NUM_FRAMES, bool O, bool a) : Pager(NUM_FRAMES, FIFO, O, a){};
 
+    frame_t *select_victim_frame()
+    {
+        frame_t *free_frame = nullptr;
+        frame_t *youngest_frame = nullptr;
+        unsigned int youngest_age = 0;
+        int start_hand_pos = CLOCK_HAND;
+        query_len = 0;
+
+        if (a)
+        {
+            if (start_hand_pos == 0)
+            {
+                printf("ASELECT %d-%d | ", start_hand_pos, NUM_FRAMES - 1);
+            }
+            else
+            {
+                printf("ASELECT %d-%d | ", start_hand_pos, start_hand_pos - 1);
+            }
+        }
+
+        while (!free_frame)
+        {
+            // Make sure we only visit each frame only once
+            if (start_hand_pos == CLOCK_HAND && (query_len > 0))
+            {
+                break;
+            }
+
+            // Helper variables
+            frame_t *potential_victim_frame = &FRAME_TABLE[CLOCK_HAND];
+            Process *temp_proc = &process_arr[potential_victim_frame->process_id];
+            pte_t *page = temp_proc->get_vpage(potential_victim_frame->VMA_page_number);
+
+            // If the page age is > TAU and its not referenced, it's selected
+            if (((inst_count - potential_victim_frame->age) >= TAU) && (!page->REFERENCED))
+            {
+                free_frame = potential_victim_frame;
+            }
+            // If the page was referenced, update time and reset ref bit
+            else if (page->REFERENCED)
+            {
+                potential_victim_frame->age = inst_count;
+                page->REFERENCED = 0;
+            }
+            // Otherwise its frame_age < tau and ref=0 -- keep youngest candidate for eviction
+            else
+            {
+                // Keep track of youngest frame
+                if (youngest_age == 0)
+                {
+                    youngest_age = potential_victim_frame->age;
+                    youngest_frame = potential_victim_frame;
+                }
+                else
+                {
+                    if (potential_victim_frame->age < youngest_age)
+                    {
+                        youngest_age = potential_victim_frame->age;
+                        youngest_frame = potential_victim_frame;
+                    }
+                }
+            }
+
+            // Keep track of how many frames we're visiting / move hand
+            query_len++;
+            increment_clock_hand();
+        }
+
+        // If we didn't find a frame in the loop, then we select the youngest
+        if (!free_frame)
+        {
+            free_frame = youngest_frame;
+        }
+
+        // Set clock hand back to appropriate spot
+        CLOCK_HAND = free_frame->frame_number;
+        increment_clock_hand();
+        return free_frame;
+    }
+
+    void map_frame(Process *process, int vpage_num, frame_t *free_frame)
+    {
+        // When mapping a frame set its age to instruction count
+        free_frame->age = inst_count;
+
+        Pager::map_frame(process, vpage_num, free_frame);
+    }
+
 private:
+    const unsigned int TAU = 50;
 };
 
 // Helper function to build pager based on CLI input
